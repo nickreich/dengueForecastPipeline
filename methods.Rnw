@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+\usepackage{geometry} 
+
+\geometry{letterpaper, top=1.5cm, left=2cm}                
+\usepackage{graphicx}
+\usepackage{amssymb, amsmath}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\renewcommand{\familydefault}{cmss}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\title{Methods for real-time forecasting}
+\author{Stephen Lauer, Nicholas G. Reich, Krzysztof Sakrejda  [for now, alphabetical by last name]}
+
+\begin{document}
+\maketitle
+
+\section{Notation and timeline for real-time forecasts}
+
+For a given year, every date is mapped to a particular biweek in that year. We define the first biweek of every year as beginning on January 1st, at 00h00m00s and the last as ending on December 31st, 11h59m59s. Every year is defined to contain exactly 26 biweeks. To make predictions on the biweekly scale, daily case counts are aggregated into their respective biweek. Counts for biweeks that have 15 days are standardized by multiplying the count by $\frac{14}{15}$ and rounding to the nearest integer. The explicit Julian calendar day to biweek mapping is given in Table \ref{tab:biweekMap}.
+
+<<biweekTable, echo=FALSE, results='asis', message=FALSE>>=
+library(cruftery)
+library(dplyr)
+library(xtable)
+leap_yr_map <- tbl_df(with(data=environment(date_to_biweek), 
+                           expr=return(leap_year_map)))
+regular_yr_map <- tbl_df(with(data=environment(date_to_biweek), 
+                              expr=return(regular_year_map)))
+leap_yr_table <- leap_yr_map %>% 
+        group_by(biweek) %>% 
+        summarize(leap_yr_start=min(julian_day),
+                  leap_yr_end=max(julian_day))
+regular_yr_table <- regular_yr_map %>% 
+        group_by(biweek) %>% 
+        summarize(reg_yr_start=min(julian_day),
+                  reg_yr_end=max(julian_day))
+biweek_table <- inner_join(leap_yr_table, regular_yr_table)
+biweek_table <- biweek_table %>%
+        mutate(reg_yr_datestart = format(as.Date(paste0(biweek_table$reg_yr_start,"-2011"), 
+                                                 format="%j-%Y"), "%b %d"),
+               reg_yr_dur = reg_yr_end-reg_yr_start+1,
+               leap_yr_datestart = format(as.Date(paste0(biweek_table$leap_yr_start,"-2012"), 
+                                                 format="%j-%Y"), "%b %d"),
+               leap_yr_dur = leap_yr_end-leap_yr_start+1) %>%
+        select(-contains("_start"), -contains("_end"))
+print(xtable(biweek_table, digits=0, align="cccccc", label="tab:biweekMap",
+             caption="Map of Julian days to biweeks used in data aggregation."), 
+      include.rownames=FALSE, caption.placement="top")
+@
+
+
+A generic biweek $b_k$ is defined as an interval $[t_{k}, t_{k+1})$ where $t_k$ is the time where the biweeks begins (e.g. Jan 1, 00h00m00s) and $t_{k+1}$ is the start of the next biweek. Every dataset is divided up into $N$ bi-weeks ($b_1$ through $b_{N}$), each of either 14 or 15 days (see Table \ref{tab:biweekMap}). 
+
+Every forecast made specifies the following dates: a ``to-date'' ($t_{to}$), a ``delivery-date'' ($t_{del}$), and an ``analysis-date'' ($t_{an}$). The to-date specifies that the current forecast will only use cases whose symptom onset date is equal to or less than $t_{to}$. The delivery-date specifies that the current forecast will only use cases that were delivered on or before $t_{del}$. The analysis-date specifies when a given forecast was run.
+
+
+A forecast also may specify a biweek lag, $l$, the number of biweeks back into the past data will be ignored. For example, if $l=4$ and $t_{del}$ lies in $b_k=[t_{k}, t_{k+1})$, then the forecast will assume that data for the past $l$ whole biweeks are systematically underreported and that biweek $b_{k-l-1}$ and all prior biweeks are complete.
+
+\begin{figure}[htbp]
+\begin{center}
+\caption{An example forecast timeline showing which cases are included relative to the delivery-dates and to-dates. In this figure, $l=3$.}
+\label{fig:timeline}
+\includegraphics[width=\linewidth]{figures/forecast_timeline.png}
+\end{center}
+\end{figure}
+
+
+\end{document}
