@@ -1,6 +1,11 @@
 ## master file for running forecasts of dengue in Thailand
 ## Nicholas Reich, Stephen Lauer
-## July 2014
+## September 2014
+
+## for shell script
+options(echo=TRUE)
+args <- commandArgs(trailingOnly = TRUE)
+#print(args)
 
 #######################
 ## SET LOCAL OPTIONS ## 
@@ -8,7 +13,7 @@
 
 ## set dates
 FROM_DATE <- as.Date('1968-01-01')
-DELIVERY_DATE <- as.Date('2014-01-23')
+DELIVERY_DATE <- as.Date(args[1])
 TO_DATE <- DELIVERY_DATE - 7*8 ## move back 8 weeks
 
 ## modeling globals
