@@ -9,10 +9,10 @@ library(dplyr)
 library(httr)
 library(devtools)
 
-install_github(rep='sakrejda/cruftery/package_dir', ref=cruftery_github_hash)
+install_github(rep='sakrejda/cruftery/package_dir')
 library(cruftery)
 
-pgsql <- '../credentials/sql_zaraza.rds'
+pgsql <- '~/credentials/sql_zaraza.rds'
 
 link <- db_connector(pgsql)
 
