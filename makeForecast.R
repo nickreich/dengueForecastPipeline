@@ -14,7 +14,7 @@ args <- commandArgs(trailingOnly = TRUE)
 ## set dates
 FROM_DATE <- as.Date('1968-01-01')
 DELIVERY_DATE <- as.Date(args[1])
-TO_DATE <- DELIVERY_DATE - 7*8 ## move back 8 weeks
+to_date_lag <- 4 # in biweeks
 
 ## modeling globals
 MODEL <- 'spamd_tops3_lag1'
@@ -68,6 +68,23 @@ library(cruftery)
 #######################
 ## pull data from DB ##
 #######################
+
+## set TO_DATE = t_{k-l}
+load("data/biweek_start_dates_leap_yr.rda")
+load("data/biweek_start_dates_noleap_yr.rda")
+delivery_biweek <- ifelse(leap_year(DELIVERY_DATE),
+                          max(which(biweek_start_dates_leap_yr < format(DELIVERY_DATE, "%j"))),
+                          max(which(biweek_start_dates_noleap_yr < format(DELIVERY_DATE, "%j"))))
+to_biweek <- ifelse(delivery_biweek <= to_date_lag , 
+                    (delivery_biweek - to_date_lag - 1)%%27, 
+                    delivery_biweek - to_date_lag)
+to_year <- ifelse(delivery_biweek <= to_date_lag,
+                  year(DELIVERY_DATE) - 1,
+                  year(DELIVERY_DATE))
+to_day <- ifelse(leap_year(to_year),
+                 biweek_start_dates_leap_yr[to_biweek],
+                 biweek_start_dates_noleap_yr[to_biweek])
+TO_DATE <- as.Date(paste(to_year, to_day), format="%Y %j")
 
 ## setup data pulls, ssh connection to zaraza needs to be established
 link <- db_connector(pgsql)
