@@ -29,4 +29,4 @@ counts <-  import_case_counts(
 ## save the counts
 counts_file <- paste0(format(Sys.Date(), "%Y%m%d"), '_counts.csv')
 
-write.csv(counts, file=paste0("counts/", counts_file))
+write.csv(counts, file=paste0("counts/", counts_file), row.names=FALSE)
