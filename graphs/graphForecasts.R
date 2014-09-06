@@ -4,7 +4,7 @@ require(cruftery)
 require(lubridate)
 
 source("biweek_to_date.R")
-counts <- read.csv("../dengueForecastAnalyses/forecasts/20140902_counts_20140902.csv")[,-1]
+counts <- read.csv("../counts/20140905_counts.csv")
 prov_data <- read.csv("../denguemodeling/spamd/trunk/manuscripts/realTimeForecasting/predictions/thaiProvinces.csv")
 
 counts$pid <- prov_data$fips[match(counts$province, prov_data$Province.ID)]
