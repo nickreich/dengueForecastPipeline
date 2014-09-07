@@ -252,3 +252,13 @@ save(dat, file=file.path(root_dir,
                          'forecasts',
                          data_file))
 
+## save the original counts
+counts_file <- paste0(format(Sys.Date(), "%Y%m%d"), 
+                      '_newcounts_', 
+                      DELIVERY_DATE_STRING, 
+                      '.csv')
+write.csv(new_counts, file=file.path(root_dir, 
+                         'dengueForecastPipeline',
+                         'forecasts',
+                         counts_file), row.names=FALSE)
+
