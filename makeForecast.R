@@ -252,7 +252,3 @@ save(dat, file=file.path(root_dir,
                          'forecasts',
                          data_file))
 
-#########################
-## generate the report ##
-#########################
-
