@@ -99,7 +99,7 @@ This file presents the current forecasts for dengue fever in Thailand, based on 
 %\end{itemize}
 
 
-<<allDataCheck, eval=TRUE, message=FALSE, warning=FALSE>>=
+<<allDataCheck, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE>>=
 ggplot(subset(counts, disease==26)) + theme_bw() +
         geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=log(count))) 
         #+ facet_wrap(~disease, ncol=1, scales="free_x")
