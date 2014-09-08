@@ -91,7 +91,7 @@ link <- db_connector(pgsql)
 
 ## pull data and aggregate, must be connected to zaraza
 new_counts <- import_case_counts(link=link, 
-                                 to_timepoint=TO_DATE,
+                                 to_timepoint=DELIVERY_DATE,
                                  from_timepoint=FROM_DATE,
                                  delivery_timepoint=DELIVERY_DATE)
 old_counts <- import_old_case_counts(link=link)
