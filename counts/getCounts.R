@@ -16,7 +16,7 @@ pgsql <- '~/credentials/sql_zaraza.rds'
 
 link <- db_connector(pgsql)
 
-counts <-  import_case_counts(
+new_counts <-  import_case_counts(
  source_table = 'unique_case_data',
  group_by = c('disease','date_sick','province', 'delivery_date'),
  from_timepoint = now() - years(100), ## FROM (open)
@@ -25,6 +25,15 @@ counts <-  import_case_counts(
  aggregate_formula = NULL,
  link = link
 )
+
+new_counts$date_sick_biweek <- date_to_biweek(new_counts$date_sick)
+new_counts$date_sick_year <- year(new_counts$date_sick)
+
+old_counts <- import_old_case_counts(link=link)
+old_counts$delivery_date <- NA
+old_counts$date_sick <- NA
+
+counts <- joint_old_new_cases(new_counts, old_counts)
 
 ## save the counts
 counts_file <- paste0(format(Sys.Date(), "%Y%m%d"), '_counts.csv')
