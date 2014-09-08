@@ -70,8 +70,7 @@ library(cruftery)
 #######################
 
 ## set TO_DATE = t_{k-l}
-load("data/biweek_start_dates_leap_yr.rda")
-load("data/biweek_start_dates_noleap_yr.rda")
+data(biweek_start_dates) ## loading from cruftery
 delivery_biweek <- ifelse(leap_year(DELIVERY_DATE),
                           max(which(biweek_start_dates_leap_yr < format(DELIVERY_DATE, "%j"))),
                           max(which(biweek_start_dates_noleap_yr < format(DELIVERY_DATE, "%j"))))
