@@ -89,18 +89,40 @@ TO_DATE <- as.Date(paste(to_year, to_day), format="%Y %j")
 link <- db_connector(pgsql)
 
 ## pull data and aggregate, must be connected to zaraza
-new_counts <- import_case_counts(link=link, 
-                                 to_timepoint=DELIVERY_DATE,
-                                 from_timepoint=FROM_DATE,
-                                 delivery_timepoint=DELIVERY_DATE)
+new_counts <-  import_case_counts(
+        source_table = 'unique_case_data',
+        group_by = c('disease','date_sick','province', 'delivery_date'),
+        from_timepoint = as.Date('1968-01-01'), ## FROM (open)
+        to_timepoint = now(), ## TO (closed)
+        delivery_timepoint = now(),
+        aggregate_formula = NULL,
+        link = link
+)
+new_counts$date_sick_biweek <- date_to_biweek(new_counts$date_sick)
+new_counts$date_sick_year <- year(new_counts$date_sick)
+
 old_counts <- import_old_case_counts(link=link)
+old_counts$delivery_date <- NA
+old_counts$date_sick <- NA
+
 counts <- joint_old_new_cases(new_counts, old_counts)
+
+## give everyone a delivery date
+idx_no_deliv_date <- which(is.na(counts$delivery_date))
+counts[idx_no_deliv_date,"delivery_date"] <- as.Date('2011-04-09')
+
+## keep only disease == 26
+counts <- filter(counts, disease==26)
 
 # ggplot(new_counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
 ## subset to onset dates < TO_DATE
 to_time <- to_year + (to_biweek-1)/26
-counts_subset <- subset(counts, (date_sick_year+(date_sick_biweek-1)/26) < to_time )
+counts_subset <- counts %>%
+        filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time,
+                as.Date(delivery_date) <= DELIVERY_DATE) %>%
+        group_by(disease, date_sick_year, date_sick_biweek, province) %>%
+        summarize(count=sum(count))
 
 ## put into wide format, save all objects needed for prediction to aggregated_data
 pred_objects <- create_standard_wide_format(counts_subset, keep_codes=26, 
@@ -260,7 +282,7 @@ counts_file <- paste0(format(Sys.Date(), "%Y%m%d"),
                       '_newcounts_', 
                       DELIVERY_DATE_STRING, 
                       '.csv')
-write.csv(new_counts, file=file.path(root_dir, 
+write.csv(counts, file=file.path(root_dir, 
                          'dengueForecastPipeline',
                          'forecasts',
                          counts_file), row.names=FALSE)
