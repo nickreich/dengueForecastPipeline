@@ -1,0 +1,120 @@
+\documentclass[11pt]{article} % article?
+\usepackage{geometry} %
+\geometry{a4paper} % or letter or a5paper or ... etc
+\usepackage{graphicx}
+\usepackage{amssymb,amsmath}
+\geometry{letterpaper, top=1in, left=1in, right=1in, bottom=1in} % to set margins
+
+\usepackage{draftwatermark}
+\SetWatermarkText{DRAFT}
+\SetWatermarkScale{8}
+
+\usepackage{setspace}
+\onehalfspacing
+
+
+\title{Real-time Forecasts of Dengue Fever in Thailand}
+\author{Nicholas Reich, Krzysztof Sakrejda, Hannah Clapham, \\ Henrik Salje, Derek Cummings, Justin Lessler}
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+
+\maketitle
+
+
+<<inputs, echo=FALSE, message=FALSE>>=
+DATA_THRU_WEEK <- 34
+current_biweek <- 14
+ANALYSIS_DATE <- '20140907'
+DELIVERY_DATE <- '20140907'
+@
+
+
+<<setup, echo=FALSE, message=FALSE>>=
+library(cruftery)
+library(ggplot2)
+
+## load country data used in forecast
+cntry_data_file <- paste0(ANALYSIS_DATE, 
+                          "_cntrydata_", 
+                          DELIVERY_DATE, 
+                          ".rda")
+load(file.path('forecasts', cntry_data_file))
+
+## load forecasts
+forecasts_file <- paste0(ANALYSIS_DATE, 
+                         "_forecast_", 
+                         DELIVERY_DATE, 
+                         ".csv")
+forecasts <- read.csv(file.path('forecasts', forecasts_file))
+
+## load count data
+counts_file <- paste0(ANALYSIS_DATE, 
+                      "_newcounts_", 
+                      DELIVERY_DATE, 
+                      ".csv")
+counts <- read.csv(file.path('forecasts', counts_file))
+
+@
+
+
+
+\section*{Executive summary}
+This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University and runs through surveillance ``Week \Sexpr{DATA_THRU_WEEK}'' of 2014. 
+
+%The forecasts presented here are based on models that have been fit to data from 1 January 1968 through XXXXX, 2014. Based on historical reporting patterns, we have seen that most provinces take up to 8 weeks to have fully reported data. So we have gone back 8 weeks from the current time, and predicted forward 12 weeks (or 6 bi-week periods). Our model creates forecasts for each of the 77 Thai provinces. For each province, the forecast is based on (1) seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one.  
+
+{\bf These forecasts should be considered preliminary drafts, as we are still working on validating these models and results.} 
+
+% \begin{table}[htdp]
+% \caption{Summary of relevant dates for this report}
+% \begin{center}
+% \begin{tabular}{rl}
+% Data received for: & Week \Sexpr{DATA_THRU_WEEK} (biweek \Sexpr{DATA_THRU_WEEK/2}) \\
+% Data assumed complete through: & Week \Sexpr{DATA_THRU_WEEK-8} (biweek \Sexpr{(DATA_THRU_WEEK-8)/2}) \\
+% Forecasts made for: & Biweeks 
+% \Sexpr{(DATA_THRU_WEEK-8)/2+1}, 
+% \Sexpr{(DATA_THRU_WEEK-8)/2+2}, 
+% \Sexpr{(DATA_THRU_WEEK-8)/2+3}, 
+% \Sexpr{(DATA_THRU_WEEK-8)/2+4}, 
+% \Sexpr{(DATA_THRU_WEEK-8)/2+5}, 
+% \Sexpr{(DATA_THRU_WEEK-8)/2+6} \\
+% \end{tabular}
+% \end{center}
+% \label{default}
+% \end{table}%
+
+%\section*{Key results}
+%At this time, we forecast that no provinces have a greater than 50\% probability of an outbreak through biweek 7. The figures on the following pages show the observed data (red lines) and our predictions (solid black lines) with confidence intervals (dashed black lines). 
+
+
+%To dos:
+%\begin{itemize}
+
+%        \item sort provinces by region
+%        \item provide annotated graphic at beginning?
+%        \item add more informative temporal labels on spatial graphic
+        
+%\end{itemize}
+
+
+<<allDataCheck, eval=TRUE>>=
+ggplot(subset(counts, disease==26)) + theme_bw() +
+        geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=log(count))) 
+        #+ facet_wrap(~disease, ncol=1, scales="free_x")
+@
+
+
+<<linegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3>>=
+make_country_prediction_line_graph(forecasts, counts)
+@
+
+
+<<makeSpatialPlotGG, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png">>=
+plot_forecast_map(forecast_data=forecasts, cdata=dat, biweek=current_biweek)
+@
+
+
+
+\end{document}
