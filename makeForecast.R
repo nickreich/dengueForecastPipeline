@@ -99,8 +99,12 @@ counts <- joint_old_new_cases(new_counts, old_counts)
 
 # ggplot(new_counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
+## subset to onset dates < TO_DATE
+to_time <- to_year + (to_biweek-1)/26
+counts_subset <- subset(counts, (date_sick_year+(date_sick_biweek-1)/26) < to_time )
+
 ## put into wide format, save all objects needed for prediction to aggregated_data
-pred_objects <- create_standard_wide_format(counts, keep_codes=26, 
+pred_objects <- create_standard_wide_format(counts_subset, keep_codes=26, 
                                             path_to_census=path_to_census_file)
 
 fname <- paste0("counts_through_", DELIVERY_DATE_STRING, ".RData")
