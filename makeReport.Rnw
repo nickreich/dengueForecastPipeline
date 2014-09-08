@@ -25,9 +25,9 @@
 
 <<inputs, echo=FALSE, message=FALSE>>=
 DATA_THRU_WEEK <- 34
-current_biweek <- 14
-ANALYSIS_DATE <- '20140907'
-DELIVERY_DATE <- '20140907'
+current_biweek <- 13
+ANALYSIS_DATE <- '20140908'
+DELIVERY_DATE <- '20140817'
 @
 
 
