@@ -5,7 +5,9 @@
 ## for shell script
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
-#print(args)
+
+if(length(args)==0)
+ args <- Sys.Date()
 
 #######################
 ## SET LOCAL OPTIONS ## 
@@ -93,7 +95,7 @@ to_time <- to_year + (to_biweek-1)/26
 counts_subset <- counts %>%
         filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time,
                 as.Date(delivery_date) <= DELIVERY_DATE) %>%
-        group_by(date_sick_year, date_sick_biweek, province) %>%
+        group_by(disease, date_sick_year, date_sick_biweek, province) %>%
         summarize(count=sum(count))
 
 ## put into wide format, save all objects needed for prediction to aggregated_data
@@ -170,7 +172,7 @@ den_smooth <- smooth.cdata(dat)
 den_mdl <- fit.cntry.pred.mdl(den_smooth, num.tops=3, cor.lags=1)
 
 den_forecast <- forecast(den_mdl, den_smooth, steps=6, stochastic=T, verbose=T, 
-                         MC.sims=10, predictions.only=T, num.cores=CORES)
+                         MC.sims=1000, predictions.only=T, num.cores=CORES)
 
 ########################
 ## save forecast data ##

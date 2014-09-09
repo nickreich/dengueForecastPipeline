@@ -1,5 +1,11 @@
 ## Load up most recent counts by delivery date 
 
+options(echo=TRUE)
+args <- commandArgs(trailingOnly = TRUE)
+
+if(length(args)==0)
+ args <- Sys.Date()
+
 ## We probably don't need all of these packages for this
 library(lubridate)
 library(parallel)
@@ -53,6 +59,6 @@ counts[idx_no_deliv_date,"delivery_date"] <- as.Date('2011-04-09', format="%Y-%m
 counts <- filter(counts, disease==26)
 
 ## save the counts
-counts_file <- paste0(format(Sys.Date(), "%Y%m%d"), '_counts.csv')
+counts_file <- paste0(format(args[1], "%Y%m%d"), '_counts.csv')
 
 write.csv(counts, file=paste0("counts/", counts_file), row.names=FALSE)

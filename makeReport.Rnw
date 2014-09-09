@@ -24,15 +24,27 @@
 
 
 <<inputs, echo=FALSE, message=FALSE>>=
-DATA_THRU_WEEK <- 34
-current_biweek <- 13
-ANALYSIS_DATE <- '20140908'
-DELIVERY_DATE <- '20140817'
+library(lubridate)
+library(cruftery)
+
+options(echo=TRUE)
+args <- commandArgs(trailingOnly = TRUE)
+
+if(length(args)==0)
+ args <- Sys.Date()
+
+#DATA_THRU_WEEK <- 34
+#current_biweek <- 13
+
+DATA_THRU_WEEK <- week(Sys.Date())
+current_biweek <- date_to_biweek(Sys.Date())
+
+ANALYSIS_DATE <- args[1]
+DELIVERY_DATE <- args[1]
 @
 
 
 <<setup, echo=FALSE, message=FALSE>>=
-library(cruftery)
 library(ggplot2)
 
 ## load country data used in forecast
@@ -40,7 +52,7 @@ cntry_data_file <- paste0(ANALYSIS_DATE,
                           "_cntrydata_", 
                           DELIVERY_DATE, 
                           ".rda")
-load(file.path('forecasts', cntry_data_file))
+load(file = paste0("forecasts/", cntry_data_file))
 
 ## load forecasts
 forecasts_file <- paste0(ANALYSIS_DATE, 
@@ -51,14 +63,12 @@ forecasts <- read.csv(file.path('forecasts', forecasts_file))
 
 ## load count data
 counts_file <- paste0(ANALYSIS_DATE, 
-                      "_newcounts_", 
-                      DELIVERY_DATE, 
-                      ".csv")
-counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
+                      "_counts.csv")
+counts <- read.csv(file.path('counts', counts_file), stringsAsFactors=FALSE)
 
 ## aggregate count data
 counts <- counts %>%
-        filter(as.Date(delivery_date) <= ymd(DELIVERY_DATE)) %>%
+        filter(as.Date(delivery_date) <= as.Date(DELIVERY_DATE, "%Y%m%d")) %>%
         group_by(disease, date_sick_year, date_sick_biweek, province) %>%
         summarize(count=sum(count))
 @
@@ -106,7 +116,7 @@ This file presents the current forecasts for dengue fever in Thailand, based on 
 
 <<allDataCheck, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE>>=
 ggplot(counts) + theme_bw() +
-        geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=log(count))) 
+        geom_raster(aes(x=date_sick_year+(date_sick_biweek-1)/26, y=province, fill=log(count))) 
         #+ facet_wrap(~disease, ncol=1, scales="free_x")
 @
 
