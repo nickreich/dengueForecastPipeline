@@ -26,12 +26,14 @@
 <<inputs, echo=FALSE, message=FALSE>>=
 library(lubridate)
 library(cruftery)
+library(dplyr)
+library(ggplot2)
 
-options(echo=TRUE)
-args <- commandArgs(trailingOnly = TRUE)
+#options(echo=TRUE)
+#args <- commandArgs(trailingOnly = TRUE)
 
-if(length(args)==0)
- args <- Sys.Date()
+#if(length(args)==0)
+# args <- Sys.Date()
 
 #DATA_THRU_WEEK <- 34
 #current_biweek <- 13
@@ -39,14 +41,12 @@ if(length(args)==0)
 DATA_THRU_WEEK <- week(Sys.Date())
 current_biweek <- date_to_biweek(Sys.Date())
 
-ANALYSIS_DATE <- args[1]
-DELIVERY_DATE <- args[1]
+ANALYSIS_DATE <- as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- as.character(Sys.Date(), "%Y%m%d")
 @
 
 
 <<setup, echo=FALSE, message=FALSE>>=
-library(ggplot2)
-
 ## load country data used in forecast
 cntry_data_file <- paste0(ANALYSIS_DATE, 
                           "_cntrydata_", 

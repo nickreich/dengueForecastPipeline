@@ -3,22 +3,25 @@ require(dplyr)
 require(cruftery)
 require(lubridate)
 
-source("biweek_to_date.R")
-counts <- read.csv("../counts/20140905_counts.csv")
+source("graphs/biweek_to_date.R")
+counts <- read.csv(paste0("counts/",as.character(Sys.Date(), "%Y%m%d"), "_counts.csv"))
 prov_data <- read.csv("../denguemodeling/spamd/trunk/manuscripts/realTimeForecasting/predictions/thaiProvinces.csv")
+
+options(echo=TRUE)
+args <- commandArgs(trailingOnly = TRUE)
+
+if(length(args)==0)
+ args <- Sys.Date()
 
 counts$pid <- prov_data$fips[match(counts$province, prov_data$Province.ID)]
 counts$prov.name <- prov_data$Province.Name[match(counts$province, prov_data$Province.ID)]
-counts$biweek <- date_to_biweek(as.Date(counts$date_sick))
-counts$biweek[which(is.na(counts$biweek))] <- 26
-counts$biweek_day <- biweek_to_date(counts$biweek, year(counts$date_sick))
+counts$biweek_day <- biweek_to_date(counts$date_sick_biweek, counts$date_sick_year)
 
 ddate.colors <- c("#D55E00", "#F0E442", "#009E73")
 
 
 check_forecasts_graph <- function(df=counts, top.provs=1, to.date=3, pred.ahead=2, lags=1, 
-                                  show.back=26, 
-                                  dates=ymd_hms(names(table(counts$delivery_date))[c(2:4, 7:22)])) {
+                                  show.back=26, dates=args[1]) {
   for(i in 1:length(dates)){
     adj_delivery <- biweek_to_date(date_to_biweek(dates[i]), year(dates[i]))
     
@@ -48,9 +51,9 @@ check_forecasts_graph <- function(df=counts, top.provs=1, to.date=3, pred.ahead=
                                   year=year(as.Date(show.back)))
     
     biweek_counts <- df %>%
-      group_by(disease, province, pid, prov.name, delivery_date, biweek, biweek_day) %>%
+      group_by(disease, province, pid, prov.name, delivery_date, date_sick_biweek, biweek_day) %>%
       summarise(count=sum(count)) %>%
-      filter(disease==26 & biweek_day >= show_biweek & biweek_day<=pred_biweek)
+      filter(biweek_day >= show_biweek & biweek_day<=pred_biweek)
     
     sick.provs <- biweek_counts %>%
       group_by(province, pid) %>%
@@ -58,21 +61,16 @@ check_forecasts_graph <- function(df=counts, top.provs=1, to.date=3, pred.ahead=
       arrange(desc(count))
     
     provinces <- sick.provs$pid[1:top.provs]
-    forecast <- read.csv(paste0("~/Documents/dengueForecastAnalyses/forecasts/20140827_forecast_",
-                                gsub("-", "", as.Date(dates[i], format="%Y%m%d")), ".csv"))[,-1]
-    forecast$biweek <- ifelse(forecast$biweek==0, 26, forecast$biweek)
-    forecast$biweek_day <-as.Date(mapply(biweek_to_date, biweek=forecast$biweek, year=forecast$year),
-                                  origin="1970-01-01")
+    forecast <- read.csv(paste0("forecasts/", as.character(Sys.Date(), format="%Y%m%d"),
+                                "_forecast_", as.character(dates[i], format="%Y%m%d"), ".csv"))[,-1]
+    forecast$biweek_day <-biweek_to_date(biweek=forecast$biweek, year=forecast$year)
     for(j in 1:length(provinces)){
       plot_counts <- filter(biweek_counts, pid==provinces[j])
-      plot_counts$delivery_biweek <- sapply(as.Date(plot_counts$delivery_date), date_to_biweek)
-      plot_counts$deliv_biweek_day <- as.Date(mapply(biweek_to_date, 
-                                                     biweek=plot_counts$delivery_biweek, 
-                                                     year=year(plot_counts$delivery_date)), 
-                                              origin="1970-01-01")
+      plot_counts$delivery_biweek <- date_to_biweek(as.Date(plot_counts$delivery_date))
+      plot_counts$deliv_biweek_day <- biweek_to_date(biweek=plot_counts$delivery_biweek, 
+                                                     year=year(plot_counts$delivery_date))
       plot_counts$avail <- ifelse(plot_counts$deliv_biweek_day<=adj_delivery, 1, 0)
       plot_counts$used <- ifelse(plot_counts$deliv_biweek_day<=adj_delivery &
-                                  # plot_counts$biweek_day>=lag_biweek & 
                                    plot_counts$biweek_day<to_biweek, 1, 0)
       plot_counts$type <- plot_counts$avail+plot_counts$used+1
       fill.cols <- ddate.colors[c(as.numeric(names(table(plot_counts$type))))]
@@ -84,11 +82,9 @@ check_forecasts_graph <- function(df=counts, top.provs=1, to.date=3, pred.ahead=
         geom_line(data=forecast1, aes(x=biweek_day, y=predicted_count, color=pname), size=2) +
         geom_point(data=forecast1, aes(x=biweek_day, y=predicted_count, color=pname), size=4) +
         scale_x_date(name="Date", limits=c(show_biweek,pred_biweek), 
-                     breaks=as.Date(mapply(biweek_to_date, 
-                                           biweek=seq(date_to_biweek(adj_delivery)-show.back,
+                     breaks=biweek_to_date(biweek=seq(date_to_biweek(adj_delivery)-show.back,
                                                       date_to_biweek(adj_delivery)+pred.ahead, 2), 
-                                           year=year(adj_delivery)),
-                                    origin="1970-01-01"))+ 
+                                           year=year(adj_delivery)))+ 
         scale_y_continuous(name="Case Counts") +
         ggtitle(paste0("Actual and Predicted Case Counts for\n", plot_counts$prov.name[1], " on ",
                        as.Date(dates[i], format="%Y%m%d"))) +

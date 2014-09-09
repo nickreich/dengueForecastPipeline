@@ -16,7 +16,7 @@ if(length(args)==0)
 ## set dates
 FROM_DATE <- as.Date('1968-01-01')
 DELIVERY_DATE <- as.Date(args[1])
-to_date_lag <- 4 # in biweeks
+to_date_lag <- 3 # in biweeks
 
 ## modeling globals
 MODEL <- 'spamd_tops3_lag1'
@@ -81,7 +81,7 @@ source("graphs/biweek_to_date.R")
 
 ## set TO_DATE = t_{k-l}
 delivery_biweek <- date_to_biweek(DELIVERY_DATE)
-TO_DATE <- biweek_to_date(delivery_biweek-to_date_lag, year(DELIVERY_DATE))
+TO_DATE <- biweek_to_date(delivery_biweek - to_date_lag, year(DELIVERY_DATE))
 to_biweek <- date_to_biweek(TO_DATE)
 to_year <- year(TO_DATE)
 
