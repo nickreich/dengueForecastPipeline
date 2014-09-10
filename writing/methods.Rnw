@@ -69,4 +69,21 @@ A forecast also may specify a biweek lag, $l$, the number of biweeks back into t
 \end{figure}
 
 
+\section{spamd-style model}
+The models that we fit to the data are defined as follows. We define the number of cases with onset at time $t$ in province $i$ as $Y_{t,i}$ and assume that
+\begin{eqnarray}
+Y_{t,i} & \sim & Poisson(\lambda_{t,i} \cdot Y_{t-1,i})
+\end{eqnarray}
+where the lag-1 term $Y_{t-1,i}$ is used as an offset in this model. Furthermore, we explicitly model the rate $\lambda$ as 
+\begin{eqnarray}
+\log \lambda_{t,i} & = & f(t) + \sum_{j\in \mathcal{C}} \sum_{k \in \mathcal{L}} \alpha_{j,k} \log \frac{Y_{t-k}+1}{Y_{t-k-1}+1}
+\end{eqnarray}
+where $\mathcal{C}$ is the set of $J$ most-correlated provinces with province $i$ and $\mathcal{L}$ is the set of lag times used in the model. Additionally $f(t)$ is assumed to be a cyclical cubic spline.
+
+We note that the model can be expressed as 
+$$\log \mathbb{E}[Y_{t,i}] = \log \lambda_{t,i} + \log Y_{t-1,i}$$
+which also defines $\lambda$ as the factor by which the prior week's case counts are scaled to equal the current weeks case counts. Due to the inclusion of the lag-1 offset term $\lambda$ is interpreted as the ratio of the current biweek to the previous biweek. While this is a valid interpretation and model for the data, it is also slightly different from common models for $\lambda$ that do not have a lag-1 offset.
+
+
+
 \end{document}
