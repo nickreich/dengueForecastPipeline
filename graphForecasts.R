@@ -99,7 +99,7 @@ check_forecasts_graph <- function(df=counts, top.provs=1, to.date=4, pred.ahead=
               legend.text = element_text(size=12),
               legend.title = element_text(size=12, face="bold"))
       print(p)
-      ggsave(filename=paste0("graphs/", plot_counts$prov.name[1], as.Date(dates[i], format="%Y%m%d"), "graph.pdf"), p)
+      ggsave(filename=paste0("forecasts/", plot_counts$prov.name[1], as.Date(dates[i], format="%Y%m%d"), "graph.pdf"), p)
     }
   }
 }
