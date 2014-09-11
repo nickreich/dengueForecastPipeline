@@ -24,16 +24,16 @@ MODEL <- 'spamd_tops3_lag1'
 
 ## define machine-specific properties/folders
 ## Nick
-CORES <- 20 
-root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
-spamd_dir <- '~/Documents/code_versioned/spamd/'
-pgsql <- '~/credentials/sql_zaraza.rds'
+#CORES <- 20 
+#root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
+#spamd_dir <- '~/Documents/code_versioned/spamd/'
+#pgsql <- '~/credentials/sql_zaraza.rds'
 
 ## Steve
-#CORES <- 2 
-#root_dir <- '~/Documents/' ## parent dir for dengueForecastPipeline repo
-#spamd_dir <- '~/Documents/denguemodeling/spamd/'
-#pgsql <- '~/Documents/credentials/sql_zaraza.rds'
+CORES <- 2 
+root_dir <- '~/Documents/' ## parent dir for dengueForecastPipeline repo
+spamd_dir <- '~/Documents/denguemodeling/spamd/'
+pgsql <- '~/Documents/credentials/sql_zaraza.rds'
 
 #######################
 ## USE LOCAL OPTIONS ## 
@@ -86,7 +86,7 @@ to_biweek <- date_to_biweek(TO_DATE)
 to_year <- year(TO_DATE)
 
 ## Load counts data
-counts <- read.csv(paste0("counts/", format(Sys.Date(), "%Y%m%d"), "_counts.csv"))
+counts <- read.csv("counts/full_counts.csv"))
 
 # ggplot(new_counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
@@ -124,7 +124,6 @@ source("trunk/manuscripts/realTimeForecasting/code/spatialPlotting.R")
 #############################
 
 load("trunk/manuscripts/realTimeForecasting/predictions/THA_adm1.RData") ## loads object called gadm
-prov_data <- read.csv("trunk/manuscripts/realTimeForecasting/predictions/thaiProvinces.csv")
 
 ## define locations for which forecasts will be created
 pnames <- as.character(pred_objects$province_names)

@@ -62,3 +62,4 @@ counts <- filter(counts, disease==26)
 counts_file <- paste0(format(args[1], "%Y%m%d"), '_counts.csv')
 
 write.csv(counts, file=paste0("counts/", counts_file), row.names=FALSE)
+write.csv(counts, file="counts/full_counts.csv", row.names=FALSE)
