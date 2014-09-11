@@ -5,6 +5,7 @@
 ## for shell script
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
+set.seed(1)
 
 if(length(args)==0)
  args <- Sys.Date()
@@ -16,7 +17,7 @@ if(length(args)==0)
 ## set dates
 FROM_DATE <- as.Date('1968-01-01')
 DELIVERY_DATE <- as.Date(args[1])
-to_date_lag <- 3 # in biweeks
+to_date_lag <- 4 # in biweeks
 
 ## modeling globals
 MODEL <- 'spamd_tops3_lag1'
@@ -29,7 +30,7 @@ MODEL <- 'spamd_tops3_lag1'
 #pgsql <- '~/credentials/sql_zaraza.rds'
 
 ## Steve
-CORES <- 4 
+CORES <- 2 
 root_dir <- '~/Documents/' ## parent dir for dengueForecastPipeline repo
 spamd_dir <- '~/Documents/denguemodeling/spamd/'
 pgsql <- '~/Documents/credentials/sql_zaraza.rds'
@@ -43,7 +44,7 @@ DELIVERY_DATE_STRING <- format(DELIVERY_DATE, "%Y%m%d") ## for use in filenames
 ANALYSIS_DATE <- Sys.Date()
 
 ## set number of computing cores
-options(mc.cores=CORES)
+options(mc.cores=CORES, error=recover)
 
 ## main repo
 setwd(file.path(root_dir, 'dengueForecastPipeline'))
@@ -72,7 +73,6 @@ cruftery_github_hash <- content(response)[['object']][['sha']]
 
 install_github(rep='sakrejda/cruftery/package_dir', ref=cruftery_github_hash)
 library(cruftery)
-source("graphs/biweek_to_date.R")
 
 
 #######################
@@ -86,7 +86,7 @@ to_biweek <- date_to_biweek(TO_DATE)
 to_year <- year(TO_DATE)
 
 ## Load counts data
-counts <- read.csv(paste0("counts/", format(Sys.Date(), "%Y%m%d"), "_counts.csv"))
+counts <- read.csv("counts/full_counts.csv"))
 
 # ggplot(new_counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
@@ -124,7 +124,6 @@ source("trunk/manuscripts/realTimeForecasting/code/spatialPlotting.R")
 #############################
 
 load("trunk/manuscripts/realTimeForecasting/predictions/THA_adm1.RData") ## loads object called gadm
-prov_data <- read.csv("trunk/manuscripts/realTimeForecasting/predictions/thaiProvinces.csv")
 
 ## define locations for which forecasts will be created
 pnames <- as.character(pred_objects$province_names)

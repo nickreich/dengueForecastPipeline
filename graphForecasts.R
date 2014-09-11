@@ -3,9 +3,8 @@ require(dplyr)
 require(cruftery)
 require(lubridate)
 
-source("graphs/biweek_to_date.R")
-counts <- read.csv(paste0("counts/",as.character(Sys.Date(), "%Y%m%d"), "_counts.csv"))
-prov_data <- read.csv("../denguemodeling/spamd/trunk/manuscripts/realTimeForecasting/predictions/thaiProvinces.csv")
+counts <- read.csv("counts/full_counts.csv"))
+data(thai_prov_data)
 
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
@@ -13,14 +12,13 @@ args <- commandArgs(trailingOnly = TRUE)
 if(length(args)==0)
  args <- Sys.Date()
 
-counts$pid <- prov_data$fips[match(counts$province, prov_data$Province.ID)]
-counts$prov.name <- prov_data$Province.Name[match(counts$province, prov_data$Province.ID)]
+counts$pid <- thai_prov_data$FIPS[match(counts$province, thai_prov_data$ISO)]
+counts$prov.name <- thai_prov_data$Province[match(counts$province, thai_prov_data$ISO)]
 counts$biweek_day <- biweek_to_date(counts$date_sick_biweek, counts$date_sick_year)
 
 ddate.colors <- c("#D55E00", "#F0E442", "#009E73")
 
-
-check_forecasts_graph <- function(df=counts, top.provs=1, to.date=3, pred.ahead=2, lags=1, 
+check_forecasts_graph <- function(df=counts, top.provs=1, to.date=4, pred.ahead=2, lags=1, 
                                   show.back=26, dates=args[1]) {
   for(i in 1:length(dates)){
     adj_delivery <- biweek_to_date(date_to_biweek(dates[i]), year(dates[i]))
@@ -101,7 +99,7 @@ check_forecasts_graph <- function(df=counts, top.provs=1, to.date=3, pred.ahead=
               legend.text = element_text(size=12),
               legend.title = element_text(size=12, face="bold"))
       print(p)
-      ggsave(filename=paste0(plot_counts$prov.name[1], as.Date(dates[i], format="%Y%m%d"), "graph.pdf"), p)
+      ggsave(filename=paste0("graphs/", plot_counts$prov.name[1], as.Date(dates[i], format="%Y%m%d"), "graph.pdf"), p)
     }
   }
 }
