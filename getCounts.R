@@ -23,10 +23,10 @@ install_github(rep='sakrejda/cruftery/package_dir', ref=cruftery_github_hash)
 library(cruftery)
 
 # Steve pgsql
-pgsql <- '~/Documents/credentials/sql_zaraza.rds'
+#pgsql <- '~/Documents/credentials/sql_zaraza.rds'
 
 # Nick pgsql
-## pgsql <- '~credentials/sql_zaraza.rds'
+ pgsql <- '~/credentials/sql_zaraza.rds'
 
 ## setup data pulls, ssh connection to zaraza needs to be established
 link <- db_connector(pgsql)
