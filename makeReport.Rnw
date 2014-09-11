@@ -35,14 +35,15 @@ library(ggplot2)
 #if(length(args)==0)
 # args <- Sys.Date()
 
-#DATA_THRU_WEEK <- 34
+DATA_THRU_WEEK <- 34
 #current_biweek <- 13
 
-DATA_THRU_WEEK <- week(Sys.Date())
-current_biweek <- date_to_biweek(Sys.Date())
+# DATA_THRU_WEEK <- week(Sys.Date())
 
-ANALYSIS_DATE <- as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- as.character(Sys.Date(), "%Y%m%d")
+ANALYSIS_DATE <- '20140910' #as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- '20140910' #as.character(Sys.Date(), "%Y%m%d")
+
+current_biweek <- date_to_biweek(ymd(DELIVERY_DATE))
 @
 
 
@@ -76,29 +77,29 @@ counts <- counts %>%
 
 
 \section*{Executive summary}
-This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University and runs through surveillance ``Week \Sexpr{DATA_THRU_WEEK}'' of 2014. 
+This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}, which is in biweek \Sexpr{current_biweek} of \Sexpr{format(ymd(DELIVERY_DATE), "%Y")}.
 
-%The forecasts presented here are based on models that have been fit to data from 1 January 1968 through XXXXX, 2014. Based on historical reporting patterns, we have seen that most provinces take up to 8 weeks to have fully reported data. So we have gone back 8 weeks from the current time, and predicted forward 12 weeks (or 6 bi-week periods). Our model creates forecasts for each of the 77 Thai provinces. For each province, the forecast is based on (1) seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one.  
+The forecasts presented here are based on models that have been fit to data from 01 January 1968 through \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}. Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently predict incident cases for each Thai province in 6 biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
 
 {\bf These forecasts should be considered preliminary drafts, as we are still working on validating these models and results.} 
 
-% \begin{table}[htdp]
-% \caption{Summary of relevant dates for this report}
-% \begin{center}
-% \begin{tabular}{rl}
-% Data received for: & Week \Sexpr{DATA_THRU_WEEK} (biweek \Sexpr{DATA_THRU_WEEK/2}) \\
-% Data assumed complete through: & Week \Sexpr{DATA_THRU_WEEK-8} (biweek \Sexpr{(DATA_THRU_WEEK-8)/2}) \\
-% Forecasts made for: & Biweeks 
-% \Sexpr{(DATA_THRU_WEEK-8)/2+1}, 
-% \Sexpr{(DATA_THRU_WEEK-8)/2+2}, 
-% \Sexpr{(DATA_THRU_WEEK-8)/2+3}, 
-% \Sexpr{(DATA_THRU_WEEK-8)/2+4}, 
-% \Sexpr{(DATA_THRU_WEEK-8)/2+5}, 
-% \Sexpr{(DATA_THRU_WEEK-8)/2+6} \\
-% \end{tabular}
-% \end{center}
-% \label{default}
-% \end{table}%
+\begin{table}[htdp]
+\caption{Summary of relevant dates for this report}
+\begin{center}
+\begin{tabular}{rl}
+Data received for: & Week \Sexpr{DATA_THRU_WEEK} (biweek \Sexpr{DATA_THRU_WEEK/2}) \\
+Data assumed complete through: & Week \Sexpr{DATA_THRU_WEEK-8} (biweek \Sexpr{(DATA_THRU_WEEK-8)/2}) \\
+Forecasts made for: & Biweeks 
+\Sexpr{(DATA_THRU_WEEK-8)/2+1}, 
+\Sexpr{(DATA_THRU_WEEK-8)/2+2}, 
+\Sexpr{(DATA_THRU_WEEK-8)/2+3}, 
+\Sexpr{(DATA_THRU_WEEK-8)/2+4}, 
+\Sexpr{(DATA_THRU_WEEK-8)/2+5}, 
+\Sexpr{(DATA_THRU_WEEK-8)/2+6} \\
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%
 
 %\section*{Key results}
 %At this time, we forecast that no provinces have a greater than 50\% probability of an outbreak through biweek 7. The figures on the following pages show the observed data (red lines) and our predictions (solid black lines) with confidence intervals (dashed black lines). 
@@ -114,7 +115,7 @@ This file presents the current forecasts for dengue fever in Thailand, based on 
 %\end{itemize}
 
 
-<<allDataCheck, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE>>=
+<<allDataCheck, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE>>=
 ggplot(counts) + theme_bw() +
         geom_raster(aes(x=date_sick_year+(date_sick_biweek-1)/26, y=province, fill=log(count))) 
         #+ facet_wrap(~disease, ncol=1, scales="free_x")
@@ -122,7 +123,59 @@ ggplot(counts) + theme_bw() +
 
 
 <<linegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3>>=
-make_country_prediction_line_graph(forecasts, counts)
+make_country_prediction_line_graph(forecasts, counts, ylim_scale=.5)
+@
+
+<<prov_linegraphs_r0, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
+        make_province_prediction_line_graph(forecasts, counts, region=0)
+@
+
+<<prov_linegraphs_r1, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
+        make_province_prediction_line_graph(forecasts, counts, region=1)
+@
+
+<<prov_linegraphs_r2, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
+        make_province_prediction_line_graph(forecasts, counts, region=2)
+@
+
+<<prov_linegraphs_r3, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
+        make_province_prediction_line_graph(forecasts, counts, region=3)
+@
+
+<<prov_linegraphs_r4, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
+        make_province_prediction_line_graph(forecasts, counts, region=4)
+@
+
+<<prov_linegraphs_r5, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
+        make_province_prediction_line_graph(forecasts, counts, region=5)
+@
+
+<<prov_linegraphs_r6, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
+        make_province_prediction_line_graph(forecasts, counts, region=6)
+@
+
+<<prov_linegraphs_r7, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
+        make_province_prediction_line_graph(forecasts, counts, region=7)
+@
+
+<<prov_linegraphs_r8, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
+        make_province_prediction_line_graph(forecasts, counts, region=8)
+@
+
+<<prov_linegraphs_r9, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
+        make_province_prediction_line_graph(forecasts, counts, region=9)
+@
+
+<<prov_linegraphs_r10, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
+        make_province_prediction_line_graph(forecasts, counts, region=10)
+@
+
+<<prov_linegraphs_r11, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
+        make_province_prediction_line_graph(forecasts, counts, region=11)
+@
+
+<<prov_linegraphs_r12, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
+        make_province_prediction_line_graph(forecasts, counts, region=12)
 @
 
 
