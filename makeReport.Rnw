@@ -14,7 +14,7 @@
 
 
 \title{Real-time Forecasts of Dengue Fever in Thailand}
-\author{Nicholas Reich, Krzysztof Sakrejda, Hannah Clapham, \\ Henrik Salje, Derek Cummings, Justin Lessler}
+\author{Nicholas Reich, Krzysztof Sakrejda, Stephen Lauer, Hannah Clapham, \\ Henrik Salje, Derek Cummings, Justin Lessler}
 
 %%% BEGIN DOCUMENT
 \begin{document}
@@ -79,9 +79,10 @@ counts <- counts %>%
 
 
 \section*{Executive summary}
-This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}, which is in biweek \Sexpr{current_biweek} of \Sexpr{format(ymd(DELIVERY_DATE), "%Y")}.
+This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}.
 
-The forecasts presented here are based on models that have been fit to data from 01 January 1968 through \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}. Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently predict incident cases for each Thai province in 6 biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
+The forecasts presented here are based on models that have been fit to data from 01 January 1968 through \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}. 
+Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently forecast incident cases for each Thai province for six sequential biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
 
 {\bf These forecasts should be considered preliminary drafts, as we are still working on validating these models and results.} 
 
@@ -125,8 +126,8 @@ ggplot(counts) + theme_bw() +
 @
 
 
-<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3>>=
-make_country_prediction_line_graph(forecasts, counts, ylim_scale=.5)
+<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
+make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
 @
 
 
@@ -189,7 +190,7 @@ make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12)
 @
 
 
-<<makeSpatialPlotGG, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png">>=
+<<makeSpatialPlotGG, fig.width=4, fig.height=4, eval=TRUE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png", cache=TRUE>>=
 plot_forecast_map(forecast_data=forecasts, cdata=dat, biweek=current_biweek)
 @
 
