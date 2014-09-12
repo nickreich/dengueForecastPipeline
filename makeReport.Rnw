@@ -37,8 +37,8 @@ library(ggplot2)
 
 DATA_THRU_WEEK <- 34 ## number from Thai filename 
 
-ANALYSIS_DATE <- '20140910' #as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- '20140910' #as.character(Sys.Date(), "%Y%m%d")
+ANALYSIS_DATE <- '20140912' #as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- '20140905' #as.character(Sys.Date(), "%Y%m%d")
 
 current_biweek <- date_to_biweek(ymd(DELIVERY_DATE))
 biweek_lag <- 4
@@ -64,7 +64,9 @@ forecasts <- read.csv(file.path('forecasts', forecasts_file))
 
 ## load count data
 counts_file <- paste0(ANALYSIS_DATE, 
-                      "_counts.csv")
+                      "_newcounts_",
+                      DELIVERY_DATE, 
+                      ".csv")
 counts <- read.csv(file.path('counts', counts_file), stringsAsFactors=FALSE)
 
 ## aggregate count data
