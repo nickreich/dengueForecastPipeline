@@ -20,12 +20,18 @@
 \begin{document}
 
 
-\maketitle
+%\maketitle
+
+
+<<installCruftery, echo=FALSE, message=FALSE, warning=FALSE>>=
+library(devtools)
+install_github(rep='sakrejda/cruftery/package_dir')
+library(cruftery)
+@
 
 
 <<inputs, echo=FALSE, message=FALSE>>=
 library(lubridate)
-library(cruftery)
 library(dplyr)
 library(ggplot2)
 
@@ -67,7 +73,7 @@ counts_file <- paste0(ANALYSIS_DATE,
                       "_newcounts_",
                       DELIVERY_DATE, 
                       ".csv")
-counts <- read.csv(file.path('counts', counts_file), stringsAsFactors=FALSE)
+counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 
 ## aggregate count data
 counts <- counts %>%
@@ -77,6 +83,12 @@ counts <- counts %>%
 @
 
 
+\noindent {\Large \bf{Real-time Forecasts of Dengue Fever in Thailand}}\\
+{\large Nicholas Reich, Krzysztof Sakrejda, Stephen Lauer, Hannah Clapham,\\ Henrik Salje, Derek Cummings, Justin Lessler}\\
+\Sexpr{format(now(), "%d %B %Y")}
+
+\noindent \rule{\textwidth}{1pt}
+
 
 \section*{Executive summary}
 This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}.
@@ -85,6 +97,11 @@ The forecasts presented here are based on models that have been fit to data from
 Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently forecast incident cases for each Thai province for six sequential biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
 
 {\bf These forecasts should be considered preliminary drafts, as we are still working on validating these models and results.} 
+
+<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
+make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
+@
+
 
 \begin{table}[htdp]
 \caption{Summary of relevant dates for this report}
@@ -126,9 +143,6 @@ ggplot(counts) + theme_bw() +
 @
 
 
-<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
-make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
-@
 
 
 
@@ -190,7 +204,7 @@ make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12)
 @
 
 
-<<makeSpatialPlotGG, fig.width=4, fig.height=4, eval=TRUE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png", cache=TRUE>>=
+<<makeSpatialPlotGG, fig.width=4, fig.height=4, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png", cache=TRUE>>=
 plot_forecast_map(forecast_data=forecasts, cdata=dat, biweek=current_biweek)
 @
 
