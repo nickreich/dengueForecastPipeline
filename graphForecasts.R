@@ -3,17 +3,28 @@ require(dplyr)
 require(cruftery)
 require(lubridate)
 
-counts <- read.csv("counts/full_counts.csv"))
+# Load most recent counts
+counts.list <- list.files(path="counts", pattern = "*.csv")
+counts.info <- file.info(paste0("counts/", counts.list))
+recent.count <- which.max(counts.info$mtime)
+counts <- read.csv(paste0("counts/", counts.list[recent.count]))
+
+# load Thai Province data from cruftery
 data(thai_prov_data)
 
+# read arguments from terminal
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
 
+# if no terminal arguments, default to today's date
 if(length(args)==0)
  args <- Sys.Date()
 
+# attach correct province numbers to counts data
 counts$pid <- thai_prov_data$FIPS[match(counts$province, thai_prov_data$ISO)]
 counts$prov.name <- thai_prov_data$Province[match(counts$province, thai_prov_data$ISO)]
+
+# assign each date_sick_biweek to the first date of the biweek
 counts$biweek_day <- biweek_to_date(counts$date_sick_biweek, counts$date_sick_year)
 
 ddate.colors <- c("#D55E00", "#F0E442", "#009E73")
@@ -21,31 +32,39 @@ ddate.colors <- c("#D55E00", "#F0E442", "#009E73")
 check_forecasts_graph <- function(df=counts, top.provs=1, to.date=4, pred.ahead=2, lags=1, 
                                   show.back=26, dates=args[1]) {
   for(i in 1:length(dates)){
+   # find the date of the first day of the biweek of the specified delivery date
     adj_delivery <- biweek_to_date(date_to_biweek(dates[i]), year(dates[i]))
     
+    # check if pred.ahead is a number
     if(!is.numeric(pred.ahead))
       stop("pred.ahead must be a number")
+    # find date of the first day of the biweek pred.ahead weeks in the future (from delivery date)
     pred_biweek <- biweek_to_date(biweek=date_to_biweek(adj_delivery)+pred.ahead, 
                                   year=year(adj_delivery))
     
+    # if to.date is a number, find the date of the biweek to.date weeks in the past
+    if(is.numeric(to.date))
+     to_biweek <- biweek_to_date(biweek=date_to_biweek(adj_delivery)-to.date, 
+                                 year=year(adj_delivery))
+    # if to.date is a date, find the date of the first day of the to.date biweek
+    if(!is.numeric(to.date))
+     to_biweek <- biweek_to_date(biweek=date_to_biweek(as.Date(to.date)), 
+                                 year=year(as.Date(to.date)))
+        
+    # check if lags is a number
     if(!is.numeric(lags))
       stop("lags must be a number")
-    lag_biweek <- biweek_to_date(biweek=date_to_biweek(adj_delivery)-to.date-lags, 
-                                  year=year(adj_delivery))
+    # find date of the first day of the biweek of lags weeks before to.date
+    lag_biweek <- biweek_to_date(biweek=date_to_biweek(to_biweek)-lags, year=year(to_biweek))
     
-    if(is.numeric(to.date))
-      to_biweek <- biweek_to_date(biweek=date_to_biweek(adj_delivery)-to.date, 
-                                  year=year(adj_delivery))
-    if(!is.numeric(to.date))
-      to_biweek <- biweek_to_date(biweek=date_to_biweek(as.Date(to.date)), 
-                                  year=year(as.Date(to.date)))
-    
+    # if show.back is a number, find the date of the biweek show.back weeks in the past
     if(is.numeric(show.back))
       show_biweek <- biweek_to_date(biweek=date_to_biweek(adj_delivery)-show.back, 
                                     year=year(adj_delivery))
     
+    # if show.back is a date, find the date of the first day of the show.back biweek
     if(!is.numeric(show.back))
-      to_biweek <- biweek_to_date(biweek=date_to_biweek(as.Date(show.back)),
+      show_biweek <- biweek_to_date(biweek=date_to_biweek(as.Date(show.back)),
                                   year=year(as.Date(show.back)))
     
     biweek_counts <- df %>%
