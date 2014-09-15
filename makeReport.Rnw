@@ -14,18 +14,24 @@
 
 
 \title{Real-time Forecasts of Dengue Fever in Thailand}
-\author{Nicholas Reich, Krzysztof Sakrejda, Hannah Clapham, \\ Henrik Salje, Derek Cummings, Justin Lessler}
+\author{Nicholas Reich, Krzysztof Sakrejda, Stephen Lauer, Hannah Clapham, \\ Henrik Salje, Derek Cummings, Justin Lessler}
 
 %%% BEGIN DOCUMENT
 \begin{document}
 
 
-\maketitle
+%\maketitle
+
+
+<<installCruftery, echo=FALSE, message=FALSE, warning=FALSE>>=
+library(devtools)
+install_github(rep='sakrejda/cruftery/package_dir')
+library(cruftery)
+@
 
 
 <<inputs, echo=FALSE, message=FALSE>>=
 library(lubridate)
-library(cruftery)
 library(dplyr)
 library(ggplot2)
 
@@ -35,15 +41,15 @@ library(ggplot2)
 #if(length(args)==0)
 # args <- Sys.Date()
 
-DATA_THRU_WEEK <- 34
-#current_biweek <- 13
+DATA_THRU_WEEK <- 34 ## number from Thai filename 
 
-# DATA_THRU_WEEK <- week(Sys.Date())
-
-ANALYSIS_DATE <- '20140910' #as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- '20140910' #as.character(Sys.Date(), "%Y%m%d")
+ANALYSIS_DATE <- '20140912' #as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- '20140905' #as.character(Sys.Date(), "%Y%m%d")
 
 current_biweek <- date_to_biweek(ymd(DELIVERY_DATE))
+biweek_lag <- 4
+
+min_plot_date <- as.Date('2012-04-01')
 @
 
 
@@ -64,8 +70,10 @@ forecasts <- read.csv(file.path('forecasts', forecasts_file))
 
 ## load count data
 counts_file <- paste0(ANALYSIS_DATE, 
-                      "_counts.csv")
-counts <- read.csv(file.path('counts', counts_file), stringsAsFactors=FALSE)
+                      "_newcounts_",
+                      DELIVERY_DATE, 
+                      ".csv")
+counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 
 ## aggregate count data
 counts <- counts %>%
@@ -75,27 +83,40 @@ counts <- counts %>%
 @
 
 
+\noindent {\Large \bf{Real-time Forecasts of Dengue Fever in Thailand}}\\
+{\large Nicholas Reich, Krzysztof Sakrejda, Stephen Lauer, Hannah Clapham,\\ Henrik Salje, Derek Cummings, Justin Lessler}\\
+\Sexpr{format(now(), "%d %B %Y")}
+
+\noindent \rule{\textwidth}{1pt}
+
 
 \section*{Executive summary}
-This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}, which is in biweek \Sexpr{current_biweek} of \Sexpr{format(ymd(DELIVERY_DATE), "%Y")}.
+This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}.
 
-The forecasts presented here are based on models that have been fit to data from 01 January 1968 through \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}. Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently predict incident cases for each Thai province in 6 biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
+The forecasts presented here are based on models that have been fit to data from 01 January 1968 through \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}. 
+Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently forecast incident cases for each Thai province for six sequential biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
 
 {\bf These forecasts should be considered preliminary drafts, as we are still working on validating these models and results.} 
+
+<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
+make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
+@
+
 
 \begin{table}[htdp]
 \caption{Summary of relevant dates for this report}
 \begin{center}
 \begin{tabular}{rl}
-Data received for: & Week \Sexpr{DATA_THRU_WEEK} (biweek \Sexpr{DATA_THRU_WEEK/2}) \\
-Data assumed complete through: & Week \Sexpr{DATA_THRU_WEEK-8} (biweek \Sexpr{(DATA_THRU_WEEK-8)/2}) \\
-Forecasts made for: & Biweeks 
-\Sexpr{(DATA_THRU_WEEK-8)/2+1}, 
-\Sexpr{(DATA_THRU_WEEK-8)/2+2}, 
-\Sexpr{(DATA_THRU_WEEK-8)/2+3}, 
-\Sexpr{(DATA_THRU_WEEK-8)/2+4}, 
-\Sexpr{(DATA_THRU_WEEK-8)/2+5}, 
-\Sexpr{(DATA_THRU_WEEK-8)/2+6} \\
+Data received through: & Week \Sexpr{DATA_THRU_WEEK}, \Sexpr{year(ymd(DELIVERY_DATE))} \\
+Most recent data transfer: & \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")} (in biweek \Sexpr{current_biweek})\\
+Data assumed complete through: & \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(DELIVERY_DATE)))-1, "%d %B %Y")} (end of biweek \Sexpr{current_biweek-biweek_lag-1})  \\
+Forecasts made for: 
+& biweek \Sexpr{current_biweek-biweek_lag} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+1} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+1, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\
+& biweek \Sexpr{current_biweek-biweek_lag+2} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+2, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+3} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+3, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+4} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+4, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+5} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+5, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\
 \end{tabular}
 \end{center}
 \label{default}
@@ -122,64 +143,68 @@ ggplot(counts) + theme_bw() +
 @
 
 
-<<linegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3>>=
-make_country_prediction_line_graph(forecasts, counts, ylim_scale=.5)
+
+
+
+<<dataPrep, echo=FALSE, message=FALSE>>=
+forecasts_prov <- get_forecast_prov_data(forecasts)
+counts_prov <- get_count_prov_data(counts, forecasts_prov, min_plot_date)
 @
 
 <<prov_linegraphs_r0, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
-        make_province_prediction_line_graph(forecasts, counts, region=0)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=0)
 @
 
 <<prov_linegraphs_r1, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-        make_province_prediction_line_graph(forecasts, counts, region=1)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=1)
 @
 
 <<prov_linegraphs_r2, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-        make_province_prediction_line_graph(forecasts, counts, region=2)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=2)
 @
 
 <<prov_linegraphs_r3, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-        make_province_prediction_line_graph(forecasts, counts, region=3)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=3)
 @
 
 <<prov_linegraphs_r4, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-        make_province_prediction_line_graph(forecasts, counts, region=4)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=4)
 @
 
 <<prov_linegraphs_r5, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-        make_province_prediction_line_graph(forecasts, counts, region=5)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=5)
 @
 
 <<prov_linegraphs_r6, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-        make_province_prediction_line_graph(forecasts, counts, region=6)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=6)
 @
 
 <<prov_linegraphs_r7, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-        make_province_prediction_line_graph(forecasts, counts, region=7)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=7)
 @
 
 <<prov_linegraphs_r8, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-        make_province_prediction_line_graph(forecasts, counts, region=8)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=8)
 @
 
 <<prov_linegraphs_r9, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-        make_province_prediction_line_graph(forecasts, counts, region=9)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=9)
 @
 
 <<prov_linegraphs_r10, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-        make_province_prediction_line_graph(forecasts, counts, region=10)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=10)
 @
 
 <<prov_linegraphs_r11, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-        make_province_prediction_line_graph(forecasts, counts, region=11)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=11)
 @
 
 <<prov_linegraphs_r12, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-        make_province_prediction_line_graph(forecasts, counts, region=12)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12)
 @
 
 
-<<makeSpatialPlotGG, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png">>=
+<<makeSpatialPlotGG, fig.width=4, fig.height=4, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png", cache=TRUE>>=
 plot_forecast_map(forecast_data=forecasts, cdata=dat, biweek=current_biweek)
 @
 
