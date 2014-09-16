@@ -30,7 +30,7 @@ counts$biweek_day <- biweek_to_date(counts$date_sick_biweek, counts$date_sick_ye
 ddate.colors <- c("#D55E00", "#F0E442", "#009E73")
 
 check_forecasts_graph <- function(df=counts, top.provs=1, to.date=4, pred.ahead=2, lags=1, 
-                                  show.back=26, dates=args[1]) {
+                                  show.back=26, dates=as.Date(args[1])) {
   for(i in 1:length(dates)){
    # find the date of the first day of the biweek of the specified delivery date
     adj_delivery <- biweek_to_date(date_to_biweek(dates[i]), year(dates[i]))
