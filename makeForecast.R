@@ -5,7 +5,7 @@
 ## for shell script
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
-set.seed(1)
+set.seed(1234)
 
 if(length(args)==0)
  args <- Sys.Date()
@@ -85,8 +85,16 @@ TO_DATE <- biweek_to_date(delivery_biweek - to_date_lag, year(DELIVERY_DATE))
 to_biweek <- date_to_biweek(TO_DATE)
 to_year <- year(TO_DATE)
 
+<<<<<<< HEAD
 ## Load counts data
 counts <- read.csv("counts/full_counts.csv")
+=======
+## Load most recent counts data
+counts.list <- list.files(path="counts", pattern = "*.csv")
+counts.info <- file.info(paste0("counts/", counts.list))
+recent.count <- which.max(counts.info$mtime)
+counts <- read.csv(paste0("counts/", counts.list[recent.count]))
+>>>>>>> 608fcf5ee1a7ed1f8f2827340e36b0f4408b30bd
 
 # ggplot(new_counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
@@ -173,7 +181,7 @@ den_mdl <- fit.cntry.pred.mdl(den_smooth, num.tops=3, cor.lags=1)
 den_forecast <- forecast(den_mdl, den_smooth, steps=6, stochastic=T, verbose=T, 
                          MC.sims=1000, predictions.only=T, num.cores=CORES)
 
-########################
+ ########################
 ## save forecast data ##
 ########################
 
