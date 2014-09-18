@@ -16,7 +16,7 @@ if(length(args)==0)
 
 ## set dates
 FROM_DATE <- as.Date('1968-01-01')
-DELIVERY_DATE <- as.Date(args[1])
+DELIVERY_DATE <- as.Date('2014-09-05')#as.Date(args[1])
 to_date_lag <- 4 # in biweeks
 
 ## modeling globals
@@ -24,16 +24,16 @@ MODEL <- 'spamd_tops3_lag1'
 
 ## define machine-specific properties/folders
 ## Nick
-#CORES <- 20 
-#root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
-#spamd_dir <- '~/Documents/code_versioned/spamd/'
-#pgsql <- '~/credentials/sql_zaraza.rds'
+CORES <- 20 
+root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
+spamd_dir <- '~/Documents/code_versioned/spamd/'
+pgsql <- '~/credentials/sql_zaraza.rds'
 
 ## Steve
-CORES <- 2 
-root_dir <- '~/Documents/' ## parent dir for dengueForecastPipeline repo
-spamd_dir <- '~/Documents/denguemodeling/spamd/'
-pgsql <- '~/Documents/credentials/sql_zaraza.rds'
+#CORES <- 2 
+#root_dir <- '~/Documents/' ## parent dir for dengueForecastPipeline repo
+#spamd_dir <- '~/Documents/denguemodeling/spamd/'
+#pgsql <- '~/Documents/credentials/sql_zaraza.rds'
 
 #######################
 ## USE LOCAL OPTIONS ## 
@@ -86,7 +86,7 @@ to_biweek <- date_to_biweek(TO_DATE)
 to_year <- year(TO_DATE)
 
 ## Load counts data
-counts <- read.csv("counts/full_counts.csv"))
+counts <- read.csv("counts/full_counts.csv")
 
 # ggplot(new_counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
