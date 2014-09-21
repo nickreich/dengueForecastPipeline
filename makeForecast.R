@@ -15,7 +15,7 @@ if(length(args)==0)
 
 ## set dates
 FROM_DATE <- as.Date('1968-01-01')
-DELIVERY_DATE <- as.Date('2014-09-05')#as.Date(args[1])
+DELIVERY_DATE <- as.Date(args[1])
 to_date_lag <- 4 # in biweeks
 
 ## modeling globals
@@ -23,7 +23,7 @@ MODEL <- 'spamd_tops3_lag1'
 
 ## define machine-specific properties/folders
 ## Nick
-CORES <- 20 
+CORES <- 4
 root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
 spamd_dir <- '~/Documents/code_versioned/spamd/'
 pgsql <- '~/credentials/sql_zaraza.rds'
