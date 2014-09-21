@@ -140,12 +140,18 @@ Forecasts made for:
 data(thai_prov_data)
 tpd <- thai_prov_data %>% 
         mutate(province=ISO,
-               province_name=reorder(Province, Population)) %>%
-        select(province_name, province) 
+               province_name=reorder(Province, Population),
+               health_region=MOPH_Admin_Code) %>%
+        select(province_name, province, health_region) 
 counts_prov_name <- left_join(counts, tpd)
 ggplot(counts_prov_name) + theme_bw() +
-        geom_raster(aes(x=date_sick_year+(date_sick_biweek-1)/26, y=province_name, fill=log10(count))) + xlab("") + ylab("") +
+        geom_raster(aes(x=date_sick_year+(date_sick_biweek-1)/26, 
+                        y=province_name, 
+                        fill=log10(count))) +
+        facet_grid(facets=health_region~., drop=TRUE, space="free", scales="free_y") + 
+        xlab("") + ylab("") +
         scale_fill_gradient2(low="green", mid="yellow", high="red", midpoint=1, limits=c(0, 4))
+        
         #+ facet_wrap(~disease, ncol=1, scales="free_x")
 @
 
