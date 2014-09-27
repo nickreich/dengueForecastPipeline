@@ -41,10 +41,10 @@ library(ggplot2)
 #if(length(args)==0)
 # args <- Sys.Date()
 
-DATA_THRU_WEEK <- 34 ## number from Thai filename 
+DATA_THRU_WEEK <- 36 ## number from Thai filename 
 
-ANALYSIS_DATE <- '20140912' #as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- '20140905' #as.character(Sys.Date(), "%Y%m%d")
+ANALYSIS_DATE <- '20140926' #as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- '20140926' #as.character(Sys.Date(), "%Y%m%d")
 
 current_biweek <- date_to_biweek(ymd(DELIVERY_DATE))
 biweek_lag <- 4
@@ -76,10 +76,10 @@ counts_file <- paste0(ANALYSIS_DATE,
 counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 
 ## aggregate count data
-counts <- counts %>%
-        filter(as.Date(delivery_date) <= as.Date(DELIVERY_DATE, "%Y%m%d")) %>%
-        group_by(disease, date_sick_year, date_sick_biweek, province) %>%
-        summarize(count=sum(count))
+# counts <- counts %>%
+#         filter(as.Date(delivery_date) <= as.Date(DELIVERY_DATE, "%Y%m%d")) %>%
+#         group_by(disease, date_sick_year, date_sick_biweek, province) %>%
+#         summarize(count=sum(count))
 @
 
 
@@ -136,7 +136,7 @@ Forecasts made for:
 %\end{itemize}
 
 
-<<allDataCheck, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE>>=
+<<allDataCheck, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE>>=
 data(thai_prov_data)
 tpd <- thai_prov_data %>% 
         mutate(province=ISO,
@@ -218,7 +218,10 @@ make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12)
 
 
 <<makeSpatialPlotGG, fig.width=4, fig.height=4, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png", cache=TRUE>>=
-plot_forecast_map(forecast_data=forecasts, cdata=dat, biweek=current_biweek)
+plot_forecast_map(forecast_data=forecasts, 
+                  cdata=dat, 
+                  biweek=current_biweek, 
+                  plot_type="outbreak")
 @
 
 
