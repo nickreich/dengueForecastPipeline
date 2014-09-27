@@ -44,6 +44,7 @@ ANALYSIS_DATE <- Sys.Date()
 
 ## set number of computing cores
 options(mc.cores=CORES)
+set.seed(1234)
 
 ## main repo
 setwd(file.path(root_dir, 'dengueForecastPipeline'))
@@ -95,8 +96,7 @@ counts <- read.csv(paste0("counts/", counts.list[recent.count]))
 ## subset to onset dates < TO_DATE
 to_time <- to_year + (to_biweek-1)/26
 counts_subset <- counts %>%
-        filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time,
-                as.Date(delivery_date) <= DELIVERY_DATE) %>%
+        filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time) %>%
         group_by(disease, date_sick_year, date_sick_biweek, province) %>%
         summarize(count=sum(count))
 
@@ -173,9 +173,9 @@ den_smooth <- smooth.cdata(dat)
 den_mdl <- fit.cntry.pred.mdl(den_smooth, num.tops=3, cor.lags=1)
 
 den_forecast <- forecast(den_mdl, den_smooth, steps=6, stochastic=T, verbose=T, 
-                         MC.sims=1000, predictions.only=T, num.cores=CORES)
+                         MC.sims=10, predictions.only=T, num.cores=CORES)
 
- ########################
+########################
 ## save forecast data ##
 ########################
 
@@ -223,7 +223,7 @@ outbreak_prob <- outbreak_prob %>% mutate(pid=den_forecast@loc.info@data$FIPS_AD
 melted_outbreak_prob <- tbl_df(melt(outbreak_prob, id.vars = c("pid")))
 melted_outbreak_prob <- 
         melted_outbreak_prob %>%
-        mutate(biweek = as.numeric(substr(variable, 7, 8)),
+        mutate(biweek = as.numeric(substr(variable, 6, 8)),
                year = as.numeric(substr(variable, 1, 4)),
                outbreak_prob = value) %>%
         select(-variable, -value)
