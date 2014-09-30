@@ -51,6 +51,8 @@ shinyServer(function(input, output) {
   
   plot_df$date <- as.Date(plot_df$date)
   
+  colnames(plot_df) <- c("Date", "Observed Cases", "Forecasted Cases")
+  
   ## this outputs the google data to be used in the UI to create the dataframe
   list(
    data=googleDataTable(plot_df))
@@ -63,13 +65,13 @@ shinyServer(function(input, output) {
   map_forecasts <- merge(forecasts, thai.pop, by.x = "pid", by.y = "FIPS", all.x=T) %>%
    filter(biweek == as.numeric(map_biweeks[input$biweek]))
   
-  map_forecasts$cpp <- 100000*map_forecasts$predicted_count/map_forecasts$Population
+  map_forecasts$cpp <- round(100000*map_forecasts$predicted_count/map_forecasts$Population,2)
   
   map_forecasts$pname <- ifelse(map_forecasts$pname == "Bangkok Metropolis", "Bangkok",
                                 as.character(map_forecasts$pname))
   
-  map_df <- data.frame(Provinces = map_forecasts$pname, 
-                       Count = map_forecasts$cpp)
+  map_df <- data.frame(map_forecasts$pname, map_forecasts$cpp)
+  colnames(map_df) <- c("Province", "Counts per 100,000 Population")
   list(
    data=googleDataTable(map_df))
   

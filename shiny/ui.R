@@ -1,22 +1,24 @@
 ## load necessary libraries
 require(googleCharts)
 
-## load in the data
-# Load most recent counts
-# counts.list <- list.files(path="../counts", pattern = "*.csv")
-# counts.info <- file.info(paste0("../counts/", counts.list))
-# recent.count <- which.max(counts.info$mtime)
-# counts <- read.csv(paste0("../counts/", counts.list[recent.count]))
+## load most recent forecasts
+forecasts.list <- list.files(path="../forecasts", pattern = "*.csv")
+forecasts.list2 <- forecasts.list[grep(pattern = "_forecast_", forecasts.list)]
+forecasts.info <- file.info(paste0("../forecasts/", forecasts.list2))
+recent.forecast <- which.max(forecasts.info$mtime)
+forecasts <- read.csv(paste0("../forecasts/", forecasts.list2[recent.forecast]))
 
-## create maxs and mins for googleCharts
-# xlim <- list(
-#  min = min(suidata$Year)-1,
-#  max = max(suidata$Year)+1
-# )
-# ylim <- list(
-#  min = 0,
-#  max = max(suidata$Crude.Rate, na.rm=T)+5
-# )
+## load thai population data
+thai.pop <- read.csv("2010Census.csv")
+
+## merge sheets
+map_forecasts <- merge(forecasts, thai.pop, by.x = "pid", by.y = "FIPS", all.x=T)
+
+## calculate predicted cases per 100,000 population
+map_forecasts$cpp <- round(100000*map_forecasts$predicted_count/map_forecasts$Population,2)
+
+map_max <- max(map_forecasts$cpp, na.rm=T)
+map_min <- min(map_forecasts$cpp, na.rm=T)
 
 ## set graph colors (special for colorblind people)
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
@@ -34,7 +36,7 @@ shinyUI(fluidPage(
    
    ## in map, allow for timespan selection
    conditionalPanel(
-    condition="input.tabs == 'map'",
+    condition="input.tabs == 'Map'",
     sliderInput("biweek", "Select Prediction Biweek",
                 min=1, max=6, value=1)),
   
@@ -49,7 +51,7 @@ shinyUI(fluidPage(
    ## create tabs
    tabsetPanel(
     ## plot map
-    tabPanel("map", ## make chart title here (otherwise not centered)
+    tabPanel("Map", ## make chart title here (otherwise not centered)
              h4("Thailand Forecasted Counts per 100,000 Population", align="center"),
              ## make line chart
              googleGeoChart("map", width="100%", height="475px", options = list(
@@ -77,6 +79,8 @@ shinyUI(fluidPage(
               
               # set colors
               colorAxis = list(
+               maxValue = map_max,
+               minValue = map_min,
                colors = cbbPalette[c(4, 5, 7)]),
               
               # set tooltip font size
@@ -84,9 +88,9 @@ shinyUI(fluidPage(
                textStyle = list(
                 fontSize = 14)
               )
-             )), id="map"),
+             )), id="Map"),
     ## plot tab with google chart options
-    tabPanel("plot",
+    tabPanel("Plot",
              ## make chart title here (otherwise not centered)
              h4("Thailand Counts and Forecast", align="center"),
              ## make line chart
@@ -110,7 +114,7 @@ shinyUI(fluidPage(
                 italic = FALSE)
               ),
               vAxis = list(
-               title = "Counts",
+               title = "Number of Cases",
                #                viewWindow = ylim,
                textStyle = list(
                 fontSize = 14),
@@ -138,7 +142,7 @@ shinyUI(fluidPage(
               ## set chart area padding
               chartArea = list(
                top = 50, left = 75,
-               height = "75%", width = "70%"
+               height = "75%", width = "65%"
               ),
               
 #               # Allow pan/zoom
@@ -164,7 +168,7 @@ shinyUI(fluidPage(
                 fontSize = 14)
               )
              )),
-             value="plot"),
+             value="Plot"),
     id="tabs")
   )
  )
