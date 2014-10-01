@@ -1,5 +1,20 @@
 ## load necessary libraries
 require(googleCharts)
+require(dplyr)
+
+## load most recent counts
+counts.list <- list.files(path="../counts", pattern = "*.csv")
+counts.info <- file.info(paste0("../counts/", counts.list))
+recent.count <- which.max(counts.info$mtime)
+counts <- read.csv(paste0("../counts/", counts.list[recent.count]))
+
+## summarise counts for whole country in each biweek
+plot_counts <- counts %>%
+ filter(disease == 26, date_sick_year >=2013) %>%
+ group_by(date_sick_biweek, date_sick_year) %>%
+ summarise(count = sum(count)) 
+
+plot_max <- ceiling(max(plot_counts$count)/1000)*1000
 
 ## load most recent forecasts
 forecasts.list <- list.files(path="../forecasts", pattern = "*.csv")
@@ -39,13 +54,13 @@ shinyUI(fluidPage(
     condition="input.tabs == 'Map'",
     sliderInput("biweek", "Select Prediction Biweek",
                 min=1, max=6, value=1)),
-  
-  tags$hr(),
-  
-  ## author line
-  helpText("Created by Stephen A Lauer")
+   
+   tags$hr(),
+   
+   ## author line
+   helpText("Created by Stephen A Lauer")
   ),
-    
+  
   ## create main panel
   mainPanel(
    ## create tabs
@@ -115,7 +130,8 @@ shinyUI(fluidPage(
               ),
               vAxis = list(
                title = "Number of Cases",
-               #                viewWindow = ylim,
+               viewWindow = list(max = plot_max),
+               #maxValue = max(plot_counts$count),
                textStyle = list(
                 fontSize = 14),
                titleTextStyle = list(
@@ -127,12 +143,16 @@ shinyUI(fluidPage(
               seriesType = "bars",
               series = list(
                "1" = list(
-                type = "line")#,
-               #                "2" = list(
-               #                 type = "area"),
-               #                "3" = list(
-               #                 type = "line")
+                type = "line"),
+               "2" = list(
+                type = "area"),
+               "3" = list(
+                type = "line", visibleInLegend=FALSE),
+               "4" = list(
+                type = "area", lineWidth=0, pointSize=0, visibleInLegend=FALSE, areaOpacity=1)
               ),
+              
+              isStacked = FALSE,
               
               ## set legend fonts
               legend = list(
@@ -145,19 +165,19 @@ shinyUI(fluidPage(
                height = "75%", width = "65%"
               ),
               
-#               # Allow pan/zoom
-#               explorer = list(),
-#               # Set bubble visual props
-#               bubble = list(
-#                opacity = 0.4, stroke = "none",
-#                # Hide bubble label
-#                textStyle = list(
-#                 color = "none"
-#                )
-#               ),
+              #               # Allow pan/zoom
+              #               explorer = list(),
+              #               # Set bubble visual props
+              #               bubble = list(
+              #                opacity = 0.4, stroke = "none",
+              #                # Hide bubble label
+              #                textStyle = list(
+              #                 color = "none"
+              #                )
+              #               ),
               
               ## set colors
-              colors = cbbPalette,
+              colors = c(cbbPalette[c(1:3,3)], "white"),
               
               ## set point size
               pointSize = 3,
