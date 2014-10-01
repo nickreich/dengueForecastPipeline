@@ -52,8 +52,8 @@ old_counts$date_sick <- NA
 counts <- joint_old_new_cases(new_counts, old_counts)
 
 ## give everyone a delivery date
-idx_no_deliv_date <- which(is.na(counts$delivery_date))
-counts[idx_no_deliv_date,"delivery_date"] <- as.Date('2011-04-09', format="%Y-%m-%d")
+#idx_no_deliv_date <- which(is.na(counts$delivery_date))
+#counts[idx_no_deliv_date,"delivery_date"] <- as.Date('2011-04-09', format="%Y-%m-%d")
 
 ## keep only disease == 26
 counts <- filter(counts, disease==26)
