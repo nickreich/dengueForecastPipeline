@@ -23,6 +23,7 @@ if(nchar(args[1])==10){
  deliv.dates <- deliv.dates[which(deliv.dates >= back.date)]
 }
 
+## selecting only biweeks for which there were data delivered in previous biweek
 date.list <- unique(biweek_to_date(biweek=date_to_biweek(deliv.dates)+1, year=year(deliv.dates)))
 
 write.csv(date.list, file=paste0("data/", as.character(Sys.Date(), "%Y%m%d"), "dateList.csv"))

@@ -173,7 +173,7 @@ den_smooth <- smooth.cdata(dat)
 den_mdl <- fit.cntry.pred.mdl(den_smooth, num.tops=3, cor.lags=1)
 
 den_forecast <- forecast(den_mdl, den_smooth, steps=6, stochastic=T, verbose=T, 
-                         MC.sims=10, predictions.only=T, num.cores=CORES)
+                         MC.sims=1000, predictions.only=T, num.cores=CORES)
 
 ########################
 ## save forecast data ##

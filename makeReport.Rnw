@@ -2,8 +2,15 @@
 \usepackage{geometry} %
 \geometry{a4paper} % or letter or a5paper or ... etc
 \usepackage{graphicx}
+\usepackage{subfig} % for tiled graphics
+\usepackage{float}
 \usepackage{amssymb,amsmath}
 \geometry{letterpaper, top=1in, left=1in, right=1in, bottom=1in} % to set margins
+
+
+% for suppressing figure numbers in captions.
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}% redefines the caption setup of the figures environment
 
 \usepackage{draftwatermark}
 \SetWatermarkText{DRAFT}
@@ -42,11 +49,13 @@ library(ggplot2)
 # args <- Sys.Date()
 
 DATA_THRU_WEEK <- 36 ## number from Thai filename 
+transmittal_date <- "20140917" ## date data transmitted from thais
+        
+ANALYSIS_DATE <- as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
 
-ANALYSIS_DATE <- '20140926' #as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- '20140926' #as.character(Sys.Date(), "%Y%m%d")
 
-current_biweek <- date_to_biweek(ymd(DELIVERY_DATE))
+current_biweek <- date_to_biweek(ymd(transmittal_date))
 biweek_lag <- 4
 
 min_plot_date <- as.Date('2012-04-01')
@@ -88,35 +97,72 @@ counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 \Sexpr{format(now(), "%d %B %Y")}
 
 \noindent \rule{\textwidth}{1pt}
+{\bf These forecasts should be considered preliminary drafts, pending model validation.} 
+\noindent \rule{\textwidth}{1pt}
 
 
-\section*{Executive summary}
-This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}.
+<<map1, fig.height=4, fig.width=2.5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+plot_forecast_map(forecast_data=forecasts, 
+                  cdata=dat, 
+                  include_legend=FALSE,
+                  biweek=current_biweek - 3, 
+                  plot_type="outbreak")
+@
 
-The forecasts presented here are based on models that have been fit to data from 01 January 1968 through \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}. 
-Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently forecast incident cases for each Thai province for six sequential biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
+<<map2, fig.height=4, fig.width=2.5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+plot_forecast_map(forecast_data=forecasts, 
+                  cdata=dat, 
+                  include_legend=FALSE,
+                  biweek=current_biweek - 1, 
+                  plot_type="outbreak")
+@
 
-{\bf These forecasts should be considered preliminary drafts, as we are still working on validating these models and results.} 
+<<map3, fig.height=4, fig.width=5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+plot_forecast_map(forecast_data=forecasts, 
+                  cdata=dat, 
+                  biweek=current_biweek + 1, 
+                  include_legend=TRUE,
+                  plot_type="outbreak")
+@
+
+% load all outbreak probability figures
+\begin{figure}[H]
+\caption{Probability of dengue fever outbreaks occuring by province in Thailand. Forecasts are made for biweekly periods. Dates in the figures indicate the first day of the forecasted biweek.  }
+\begin{tabular}{lll}
+  \includegraphics[width=.25\linewidth]{figure/map1.png} &   \includegraphics[width=.25\linewidth]{figure/map2.png} &   \includegraphics[width=.5\linewidth]{figure/map3.png}
+\end{tabular}
+\end{figure}
+
+\noindent \rule{\textwidth}{1pt}
 
 <<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
 make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
 @
 
 
+\section*{Executive summary}
+This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(transmittal_date), "%d %B %Y")}.
+
+The forecasts presented here are based on models that have been fit to data from 01 January 1968 through \Sexpr{format(ymd(transmittal_date), "%d %B %Y")}. 
+Based on historical reporting patterns, we have seen that most provinces take up to 4 biweeks (about 8 weeks) to have fully reported case data. Our current models use all available data excluding cases reported in the most recent 4 completed biweeks. We are working on building models that can also use these more recent, incompletely reported, case counts. Our models currently forecast incident cases for each Thai province for six sequential biweek periods. For each province, the forecast is based on (1) historical seasonal dynamics of dengue in that province, and (2) observed case counts at the previous time-point from that province and from two other provinces that have historically shown strong correlations with this one. We use Poisson generalized linear additive models to fit these data and create the forecasts.
+
+
+
+
 \begin{table}[htdp]
 \caption{Summary of relevant dates for this report}
 \begin{center}
 \begin{tabular}{rl}
-Data received through: & Week \Sexpr{DATA_THRU_WEEK}, \Sexpr{year(ymd(DELIVERY_DATE))} \\
-Most recent data transfer: & \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")} (in biweek \Sexpr{current_biweek})\\
-Data assumed complete through: & \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(DELIVERY_DATE)))-1, "%d %B %Y")} (end of biweek \Sexpr{current_biweek-biweek_lag-1})  \\
+Data received through: & Week \Sexpr{DATA_THRU_WEEK}, \Sexpr{year(ymd(transmittal_date))} \\
+Most recent data transfer: & \Sexpr{format(ymd(transmittal_date), "%d %B %Y")} (in biweek \Sexpr{current_biweek})\\
+Data assumed complete through: & \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(transmittal_date)))-1, "%d %B %Y")} (end of biweek \Sexpr{current_biweek-biweek_lag-1})  \\
 Forecasts made for: 
-& biweek \Sexpr{current_biweek-biweek_lag} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+1} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+1, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\
-& biweek \Sexpr{current_biweek-biweek_lag+2} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+2, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+3} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+3, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+4} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+4, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+5} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+5, year(ymd(DELIVERY_DATE))), "%d %B %Y")}) \\
+& biweek \Sexpr{current_biweek-biweek_lag} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+1} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+1, year(ymd(transmittal_date))), "%d %B %Y")}) \\
+& biweek \Sexpr{current_biweek-biweek_lag+2} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+2, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+3} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+3, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+4} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+4, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+& biweek \Sexpr{current_biweek-biweek_lag+5} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+5, year(ymd(transmittal_date))), "%d %B %Y")}) \\
 \end{tabular}
 \end{center}
 \label{default}
@@ -136,7 +182,7 @@ Forecasts made for:
 %\end{itemize}
 
 
-<<allDataCheck, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE>>=
+<<allDataCheck, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE>>=
 data(thai_prov_data)
 tpd <- thai_prov_data %>% 
         mutate(province=ISO,
@@ -215,15 +261,6 @@ make_province_prediction_line_graph(forecasts_prov, counts_prov, region=11)
 <<prov_linegraphs_r12, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
 make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12)
 @
-
-
-<<makeSpatialPlotGG, fig.width=4, fig.height=4, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png", cache=TRUE>>=
-plot_forecast_map(forecast_data=forecasts, 
-                  cdata=dat, 
-                  biweek=current_biweek, 
-                  plot_type="outbreak")
-@
-
 
 
 \end{document}
