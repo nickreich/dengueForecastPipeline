@@ -8,7 +8,6 @@ counts.list <- list.files(path="../counts", pattern = "*.csv")
 counts.info <- file.info(paste0("../counts/", counts.list))
 recent.count <- which.max(counts.info$mtime)
 counts <- read.csv(paste0("../counts/", counts.list[recent.count]))
-
  
 ## load most recent forecasts
 forecasts.list <- list.files(path="../forecasts", pattern = "*.csv")
@@ -40,18 +39,19 @@ shinyServer(function(input, output) {
   
   plot_forecasts <- forecasts %>%
    group_by(biweek, year) %>%
-   summarise(predicted_count = sum(predicted_count))#,
-  #              ub = sum(ub),
-  #              lb = sum(lb))
+   summarise(predicted_count = sum(predicted_count),
+               ub = sum(ub),
+               lb = sum(lb))
+  plot_forecasts$unseen <- plot_forecasts$lb
   
   plot_forecasts$date <- biweek_to_date(plot_forecasts$biweek, 
                                         plot_forecasts$year)
   
-  plot_df <- merge(plot_counts, plot_forecasts, by = "date", all=T)[,c("date", "count", "predicted_count")]#, "ub", "lb")]
+  plot_df <- merge(plot_counts, plot_forecasts, by = "date", all=T)[,c("date", "count", "predicted_count", "ub", "lb", "unseen")]
   
   plot_df$date <- as.Date(plot_df$date)
   
-  colnames(plot_df) <- c("Date", "Observed Cases", "Forecasted Cases")
+  colnames(plot_df) <- c("Date", "Observed Cases", "Forecasted Cases", "Forecast Bounds", "Forecast Lower Bound", "Unseen")
   
   ## this outputs the google data to be used in the UI to create the dataframe
   list(
