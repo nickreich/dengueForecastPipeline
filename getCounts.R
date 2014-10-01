@@ -3,8 +3,11 @@
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
 
-if(length(args)==0)
- args <- Sys.Date()
+if(length(args)==0) {
+        args <- Sys.Date()
+} else {
+        args <- as.Date(args)
+}
 
 ## We probably don't need all of these packages for this
 library(lubridate)

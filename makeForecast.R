@@ -6,8 +6,11 @@
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
 
-if(length(args)==0)
- args <- Sys.Date()
+if(length(args)==0) {
+        args <- Sys.Date()
+} else {
+       args <- as.Date(args)
+}
 
 #######################
 ## SET LOCAL OPTIONS ## 
@@ -23,7 +26,7 @@ MODEL <- 'spamd_tops3_lag1'
 
 ## define machine-specific properties/folders
 ## Nick
-CORES <- 4
+CORES <- 20
 root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
 spamd_dir <- '~/Documents/code_versioned/spamd/'
 pgsql <- '~/credentials/sql_zaraza.rds'
