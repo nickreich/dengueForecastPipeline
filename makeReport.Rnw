@@ -49,10 +49,10 @@ library(ggplot2)
 # args <- Sys.Date()
 
 DATA_THRU_WEEK <- 36 ## number from Thai filename 
-transmittal_date <- "20140917" ## date data transmitted from thais
+transmittal_date <- "20140929" ## date data transmitted from thais
         
 ANALYSIS_DATE <- as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
+DELIVERY_DATE <- "20140929" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
 
 
 current_biweek <- date_to_biweek(ymd(transmittal_date))
