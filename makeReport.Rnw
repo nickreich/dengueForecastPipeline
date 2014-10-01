@@ -105,7 +105,7 @@ counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
                   include_legend=FALSE,
-                  biweek=current_biweek-3, 
+                  biweek=current_biweek - 3, 
                   plot_type="outbreak")
 @
 
@@ -113,14 +113,14 @@ plot_forecast_map(forecast_data=forecasts,
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
                   include_legend=FALSE,
-                  biweek=current_biweek-1, 
+                  biweek=current_biweek - 1, 
                   plot_type="outbreak")
 @
 
 <<map3, fig.height=4, fig.width=5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
-                  biweek=current_biweek+1, 
+                  biweek=current_biweek + 1, 
                   include_legend=TRUE,
                   plot_type="outbreak")
 @
@@ -182,7 +182,7 @@ Forecasts made for:
 %\end{itemize}
 
 
-<<allDataCheck, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE>>=
+<<allDataCheck, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE>>=
 data(thai_prov_data)
 tpd <- thai_prov_data %>% 
         mutate(province=ISO,
