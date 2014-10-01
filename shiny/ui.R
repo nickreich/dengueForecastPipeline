@@ -2,43 +2,6 @@
 require(googleCharts)
 require(dplyr)
 
-## load most recent counts
-counts.list <- list.files(path="../counts", pattern = "*.csv")
-counts.info <- file.info(paste0("../counts/", counts.list))
-recent.count <- which.max(counts.info$mtime)
-counts <- read.csv(paste0("../counts/", counts.list[recent.count]))
-
-## summarise counts for whole country in each biweek
-plot_counts <- counts %>%
- filter(disease == 26, date_sick_year >=2013) %>%
- group_by(date_sick_biweek, date_sick_year) %>%
- summarise(count = sum(count)) 
-
-plot_max <- ceiling(max(plot_counts$count)/1000)*1000
-
-## load most recent forecasts
-forecasts.list <- list.files(path="../forecasts", pattern = "*.csv")
-forecasts.list2 <- forecasts.list[grep(pattern = "_forecast_", forecasts.list)]
-forecasts.info <- file.info(paste0("../forecasts/", forecasts.list2))
-recent.forecast <- which.max(forecasts.info$mtime)
-forecasts <- read.csv(paste0("../forecasts/", forecasts.list2[recent.forecast]))
-
-## load thai population data
-thai.pop <- read.csv("2010Census.csv")
-
-## merge sheets
-map_forecasts <- merge(forecasts, thai.pop, by.x = "pid", by.y = "FIPS", all.x=T)
-
-## calculate predicted cases per 100,000 population
-map_forecasts$cpp <- round(100000*map_forecasts$predicted_count/map_forecasts$Population,2)
-
-map_max <- max(map_forecasts$cpp, na.rm=T)
-map_min <- min(map_forecasts$cpp, na.rm=T)
-
-## set graph colors (special for colorblind people)
-cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
-                "#0072B2", "#D55E00", "#CC79A7")
-
 shinyUI(fluidPage(
  ## this starts the googleCharts engine
  googleChartsInit(),
@@ -46,19 +9,27 @@ shinyUI(fluidPage(
  ## create sidebar
  sidebarLayout(
   sidebarPanel(
-   helpText("If using Internet Explorer, application only visible in version 10."),
+   
+   ## author line
+   h5(paste0("Created by Stephen A Lauer, Krzysztof Sakrejda, and Nicholas G Reich")),
+   
    tags$hr(),
    
    ## in map, allow for timespan selection
    conditionalPanel(
     condition="input.tabs == 'Map'",
-    sliderInput("biweek", "Select Prediction Biweek",
-                min=1, max=6, value=1)),
+    selectInput("date", "Select Prediction Date", choices = names(table(forecasts$date)))),
    
-   tags$hr(),
+   conditionalPanel(
+    condition="input.tabs == 'Map'",
+    selectInput("var", "Select Prediction Variable", 
+                choices = list("Outbreak Probability" = "outbreak_prob",
+                               "Incidence" = "cpp"))),
    
-   ## author line
-   helpText("Created by Stephen A Lauer")
+   conditionalPanel(
+    condition="input.tabs == 'Plot'",
+    selectInput("moph", "Select MOPH Region", multiple = TRUE,
+                choices = seq(0,12)))
   ),
   
   ## create main panel
@@ -94,7 +65,7 @@ shinyUI(fluidPage(
               
               # set colors
               colorAxis = list(
-               maxValue = map_max,
+               #maxValue = map_max,
                minValue = map_min,
                colors = cbbPalette[c(4, 5, 7)]),
               
@@ -105,9 +76,9 @@ shinyUI(fluidPage(
               )
              )), id="Map"),
     ## plot tab with google chart options
-    tabPanel("Plot",
+    tabPanel("Time Series",
              ## make chart title here (otherwise not centered)
-             h4("Thailand Counts and Forecast", align="center"),
+             h4("Observed and forecasted cases of dengue fever", align="center"),
              ## make line chart
              googleComboChart("plot", width="100%", height="475px", options = list(
               
@@ -117,7 +88,7 @@ shinyUI(fluidPage(
               
               ## set axis titles, ticks, fonts, and ranges
               hAxis = list(
-               title = "Date",
+               #title = "",
                #format = "####-##-##",
                #                ticks = seq(1999, 2011, 2),
                #                viewWindow = xlim,
@@ -129,9 +100,7 @@ shinyUI(fluidPage(
                 italic = FALSE)
               ),
               vAxis = list(
-               title = "Number of Cases",
-               viewWindow = list(max = plot_max),
-               #maxValue = max(plot_counts$count),
+               title = "Number of cases per biweek",
                textStyle = list(
                 fontSize = 14),
                titleTextStyle = list(
