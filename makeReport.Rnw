@@ -2,6 +2,8 @@
 \usepackage{geometry} %
 \geometry{a4paper} % or letter or a5paper or ... etc
 \usepackage{graphicx}
+\usepackage{subfig} % for tiled graphics
+\usepackage{float}
 \usepackage{amssymb,amsmath}
 \geometry{letterpaper, top=1in, left=1in, right=1in, bottom=1in} % to set margins
 
@@ -90,6 +92,44 @@ counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 \noindent \rule{\textwidth}{1pt}
 
 
+<<map1, fig.height=4, fig.width=2, dpi=400, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+plot_forecast_map(forecast_data=forecasts, 
+                  cdata=dat, 
+                  include_legend=FALSE,
+                  biweek=current_biweek-3, 
+                  plot_type="outbreak")
+@
+
+<<map2, fig.height=4, fig.width=2, dpi=400, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+plot_forecast_map(forecast_data=forecasts, 
+                  cdata=dat, 
+                  include_legend=FALSE,
+                  biweek=current_biweek-1, 
+                  plot_type="outbreak")
+@
+
+<<map3, fig.height=4, fig.width=4, dpi=400, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+plot_forecast_map(forecast_data=forecasts, 
+                  cdata=dat, 
+                  biweek=current_biweek+1, 
+                  include_legend=TRUE,
+                  plot_type="outbreak")
+@
+
+% load all outbreak probability figures
+\begin{figure}[H]
+\caption{Outbreak probabilities across Thailand.}
+\begin{tabular}{ccc}
+  \includegraphics[width=.25\linewidth]{figure/map1.png} &   \includegraphics[width=.25\linewidth]{figure/map2.png} &   \includegraphics[width=.5\linewidth]{figure/map3.png} \\
+(a) three biweeks ago & (b) one biweek ago & (c) one biweek ahead \\
+\end{tabular}
+\end{figure}
+
+<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
+make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
+@
+
+
 \section*{Executive summary}
 This file presents the current forecasts for dengue fever in Thailand, based on data from the Thai Ministry of Public Health. The data in this report was transmitted to researchers at UMass-Amherst and Johns Hopkins University on \Sexpr{format(ymd(DELIVERY_DATE), "%d %B %Y")}.
 
@@ -98,9 +138,6 @@ Based on historical reporting patterns, we have seen that most provinces take up
 
 {\bf These forecasts should be considered preliminary drafts, as we are still working on validating these models and results.} 
 
-<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
-make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
-@
 
 
 \begin{table}[htdp]
@@ -215,15 +252,6 @@ make_province_prediction_line_graph(forecasts_prov, counts_prov, region=11)
 <<prov_linegraphs_r12, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
 make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12)
 @
-
-
-<<makeSpatialPlotGG, fig.width=4, fig.height=4, eval=FALSE, dpi=200, echo=FALSE, message=FALSE, fig.cap="Outbreak probabilities", dev="png", cache=TRUE>>=
-plot_forecast_map(forecast_data=forecasts, 
-                  cdata=dat, 
-                  biweek=current_biweek, 
-                  plot_type="outbreak")
-@
-
 
 
 \end{document}
