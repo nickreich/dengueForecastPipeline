@@ -120,8 +120,7 @@ plot_forecast_map(forecast_data=forecasts,
 \begin{figure}[H]
 \caption{Outbreak probabilities across Thailand.}
 \begin{tabular}{lll}
-  \includegraphics[width=.25\linewidth]{figure/map1.png} &   \includegraphics[width=.25\linewidth]{figure/map2.png} &   \includegraphics[width=.5\linewidth]{figure/map3.png} \\
-(a) three biweeks ago & (b) one biweek ago & (c) one biweek ahead \\
+  \includegraphics[width=.25\linewidth]{figure/map1.png} &   \includegraphics[width=.25\linewidth]{figure/map2.png} &   \includegraphics[width=.5\linewidth]{figure/map3.png}
 \end{tabular}
 \end{figure}
 
