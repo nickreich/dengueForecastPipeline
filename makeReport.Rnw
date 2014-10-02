@@ -48,10 +48,10 @@ library(ggplot2)
 #if(length(args)==0)
 # args <- Sys.Date()
 
-DATA_THRU_WEEK <- 36 ## number from Thai filename 
+DATA_THRU_WEEK <- 38 ## number from Thai filename 
 transmittal_date <- "20140929" ## date data transmitted from thais
         
-ANALYSIS_DATE <- as.character(Sys.Date(), "%Y%m%d")
+ANALYSIS_DATE <- "20141001" #as.character(Sys.Date(), "%Y%m%d")
 DELIVERY_DATE <- "20140929" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
 
 
@@ -105,7 +105,7 @@ counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
                   include_legend=FALSE,
-                  biweek=current_biweek - 3, 
+                  biweek_to_plot=current_biweek-3, 
                   plot_type="outbreak")
 @
 
@@ -113,14 +113,14 @@ plot_forecast_map(forecast_data=forecasts,
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
                   include_legend=FALSE,
-                  biweek=current_biweek - 1, 
+                  biweek_to_plot=current_biweek-1, 
                   plot_type="outbreak")
 @
 
 <<map3, fig.height=4, fig.width=5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
-                  biweek=current_biweek + 1, 
+                  biweek_to_plot=current_biweek+1, 
                   include_legend=TRUE,
                   plot_type="outbreak")
 @
