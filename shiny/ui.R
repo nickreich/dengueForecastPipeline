@@ -36,7 +36,7 @@ shinyUI(fluidPage(
    
    conditionalPanel(
     condition="input.tabs == 'Plot'",
-    dateInput("start", "Select Start Date", value = "2013-01-01")
+    selectInput("start", "Select Start Year", choices = seq(2014, 2000, -1), selected = 2013)
     )
   ),
   
@@ -86,7 +86,7 @@ shinyUI(fluidPage(
     ## plot tab with google chart options
     tabPanel("Time Series",
              ## make chart title here (otherwise not centered)
-             h4("Observed and forecasted cases of dengue fever", align="center"),
+             h4(uiOutput("plot_title"), align="center"),
              ## make line chart
              googleComboChart("plot", width="100%", height="475px", options = list(
               
@@ -119,14 +119,16 @@ shinyUI(fluidPage(
               
               seriesType = "bars",
               series = list(
-               "1" = list(
-                type = "line"),
+#                "1" = list(
+#                 type = "line"),
                "2" = list(
-                type = "area"),
+                type = "line"),
                "3" = list(
-                type = "line", visibleInLegend=FALSE),
+                type = "area"),
                "4" = list(
-                type = "area", lineWidth=0, pointSize=0, visibleInLegend=FALSE, areaOpacity=1)
+                type = "area", lineWidth=0, pointSize=0, areaOpacity=1, visibleInLegend=FALSE),
+               "5" = list(
+                type = "line", visibleInLegend=FALSE)
               ),
               
               isStacked = FALSE,
@@ -154,7 +156,7 @@ shinyUI(fluidPage(
               #               ),
               
               ## set colors
-              colors = c(cbbPalette[c(1:3,3)], "white", "gray"),
+              colors = c(cbbPalette[1], "gray", cbbPalette[2:3], "white", cbbPalette[3]),
               
               ## set point size
               pointSize = 3,

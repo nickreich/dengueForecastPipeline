@@ -14,9 +14,9 @@ shinyServer(function(input, output) {
   
   ## format counts into plot format 
   plot_counts <- merge(counts, thai_prov_data, by="province", all.x=T) %>%
-   filter(disease == 26, date >= input$start, MOPH_Admin_Code %in% moph) %>%
+   filter(disease == 26, date_sick_year >= input$start, MOPH_Admin_Code %in% moph) %>%
    group_by(date_sick_biweek, date_sick_year) %>%
-   summarise(count = sum(count))
+   summarise(count = round(sum(count)))
   
   ## add date variable
   plot_counts$date <- biweek_to_date(plot_counts$date_sick_biweek, 
@@ -25,9 +25,9 @@ shinyServer(function(input, output) {
   plot_forecasts <- merge(forecasts, thai_prov_data, by.x="pid", by.y="FIPS", all.x=T) %>%
    filter(MOPH_Admin_Code %in% moph) %>%
    group_by(biweek, year) %>%
-   summarise(predicted_count = sum(predicted_count),
-               ub = sum(ub),
-               lb = sum(lb))
+   summarise(predicted_count = round(sum(predicted_count)),
+               ub = round(sum(ub)),
+               lb = round(sum(lb)))
   plot_forecasts$unseen <- plot_forecasts$lb
   
   plot_forecasts$date <- biweek_to_date(plot_forecasts$biweek, plot_forecasts$year)
@@ -40,14 +40,16 @@ shinyServer(function(input, output) {
   
   plot_df$count <- ifelse(is.na(plot_df$predicted_count), plot_df$count, NA)
   
-  colnames(plot_df) <- c("Date", "Observed Cases", "Forecasted Cases", "Confidence interval", "Forecast Lower Bound", "Unseen", "Incomplete Recent Cases")
+  plot_df <- select(plot_df, date, count, unused, predicted_count, ub, unseen, lb)
+  
+  colnames(plot_df) <- c("Date", "Observed Cases", "Incomplete Recent Cases", "Forecasted Cases", "Confidence interval", "Unseen", "CI Lower Bound")
   
   ## this outputs the google data to be used in the UI to create the dataframe
   list(
    data=googleDataTable(plot_df),
    options = list(
     vAxis = list(
-     viewWindow = list(max = max(plot_counts$count))
+     viewWindow = list(max = max(plot_counts$count, plot_forecasts$predicted_count)*1.1)
     )
     ))
  })
@@ -79,6 +81,14 @@ shinyServer(function(input, output) {
  output$map_title <- renderUI({
   ifelse(input$var=="cpp", "Forecasted dengue cases per 100,000 inhabitants",
          "Probability of dengue outbreak occurrence")
+ })
+ 
+ output$plot_title <- renderUI({
+  if(input$moph=="all")
+   return("Observed and forecasted cases of dengue fever in Thailand")
+  if(input$moph==0)
+   return("Observed and forecasted cases of dengue fever in Bangkok")
+  return(paste("Observed and forecasted cases of dengue fever in MOPH Region", input$moph))
  })
  
 })
