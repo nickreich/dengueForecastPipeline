@@ -9,12 +9,12 @@ shinyServer(function(input, output) {
  output$plot <- reactive({
   moph <- input$moph
   
-  if(is.null(input$moph))
+  if(moph == "all")
    moph <- seq(0, 12)
   
   ## format counts into plot format 
   plot_counts <- merge(counts, thai_prov_data, by="province", all.x=T) %>%
-   filter(disease == 26, date_sick_year >=2013, MOPH_Admin_Code %in% moph) %>%
+   filter(disease == 26, date >= input$start, MOPH_Admin_Code %in% moph) %>%
    group_by(date_sick_biweek, date_sick_year) %>%
    summarise(count = sum(count))
   
@@ -36,7 +36,11 @@ shinyServer(function(input, output) {
   
   plot_df$date <- as.Date(plot_df$date)
   
-  colnames(plot_df) <- c("Date", "Observed Cases", "Forecasted Cases", "Confidence interval", "Forecast Lower Bound", "Unseen")
+  plot_df$unused <- ifelse(is.na(plot_df$predicted_count), NA, plot_df$count)
+  
+  plot_df$count <- ifelse(is.na(plot_df$predicted_count), plot_df$count, NA)
+  
+  colnames(plot_df) <- c("Date", "Observed Cases", "Forecasted Cases", "Confidence interval", "Forecast Lower Bound", "Unseen", "Incomplete Recent Cases")
   
   ## this outputs the google data to be used in the UI to create the dataframe
   list(
@@ -60,14 +64,21 @@ shinyServer(function(input, output) {
   
   map_df <- data.frame(map_forecasts$pname, map_forecasts[,input$var])
   colnames(map_df)[1] <- "Province"
-  colnames(map_df)[2] <- ifelse(input$var == "cpp", "Counts per 100,000 Population",
+  colnames(map_df)[2] <- ifelse(input$var == "cpp", "Cases per 100,000 Population",
                                 "Outbreak Probability")
+  
+  
+  
   list(data=googleDataTable(map_df), 
        options = list(
         colorAxis = list(
-         maxValue = max(map_df[,2], 1))
+         maxValue = max(map_max[input$var=="cpp"], 1, na.rm=T))
         ))
-  
+ })
+ 
+ output$map_title <- renderUI({
+  ifelse(input$var=="cpp", "Forecasted dengue cases per 100,000 inhabitants",
+         "Probability of dengue outbreak occurrence")
  })
  
 })

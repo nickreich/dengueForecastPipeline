@@ -7,6 +7,8 @@ counts.info <- file.info(paste0("../counts/", counts.list))
 recent.count <- which.max(counts.info$mtime)
 counts <- read.csv(paste0("../counts/", counts.list[recent.count]))
 
+counts$date <- biweek_to_date(counts$date_sick_biweek, counts$date_sick_year)
+
 ## load most recent forecasts
 forecasts.list <- list.files(path="../forecasts", pattern = "*.csv")
 forecasts.list2 <- forecasts.list[grep(pattern = "_forecast_", forecasts.list)]

@@ -5,7 +5,8 @@ require(dplyr)
 shinyUI(fluidPage(
  ## this starts the googleCharts engine
  googleChartsInit(),
- 
+ ## create title
+ titlePanel("Dengue prediction in Thailand"),
  ## create sidebar
  sidebarLayout(
   sidebarPanel(
@@ -18,18 +19,25 @@ shinyUI(fluidPage(
    ## in map, allow for timespan selection
    conditionalPanel(
     condition="input.tabs == 'Map'",
-    selectInput("date", "Select Prediction Date", choices = names(table(forecasts$date)))),
+    selectInput("date", "Select Date", choices = names(table(forecasts$date)))),
    
    conditionalPanel(
     condition="input.tabs == 'Map'",
-    selectInput("var", "Select Prediction Variable", 
+    selectInput("var", "Select Variable", 
                 choices = list("Outbreak Probability" = "outbreak_prob",
                                "Incidence" = "cpp"))),
    
    conditionalPanel(
     condition="input.tabs == 'Plot'",
-    selectInput("moph", "Select MOPH Region", multiple = TRUE,
-                choices = seq(0,12)))
+    selectInput("moph", "Select MOPH Region", multiple = FALSE,
+                choices = c(list("Thailand" = "all",
+                               "Bangkok" = 0), seq(1,12))
+                )),
+   
+   conditionalPanel(
+    condition="input.tabs == 'Plot'",
+    dateInput("start", "Select Start Date", value = "2013-01-01")
+    )
   ),
   
   ## create main panel
@@ -38,7 +46,7 @@ shinyUI(fluidPage(
    tabsetPanel(
     ## plot map
     tabPanel("Map", ## make chart title here (otherwise not centered)
-             h4("Thailand Forecasted Counts per 100,000 Population", align="center"),
+             h4(uiOutput("map_title"), align="center"),
              ## make line chart
              googleGeoChart("map", width="100%", height="475px", options = list(
               
@@ -66,7 +74,7 @@ shinyUI(fluidPage(
               # set colors
               colorAxis = list(
                #maxValue = map_max,
-               minValue = map_min,
+               minValue = 0,
                colors = cbbPalette[c(4, 5, 7)]),
               
               # set tooltip font size
@@ -146,7 +154,7 @@ shinyUI(fluidPage(
               #               ),
               
               ## set colors
-              colors = c(cbbPalette[c(1:3,3)], "white"),
+              colors = c(cbbPalette[c(1:3,3)], "white", "gray"),
               
               ## set point size
               pointSize = 3,
