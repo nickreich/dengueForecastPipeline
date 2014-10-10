@@ -42,7 +42,7 @@ shinyServer(function(input, output) {
   
   plot_df <- select(plot_df, date, count, unused, predicted_count, ub, unseen, lb)
   
-  colnames(plot_df) <- c("Date", "Observed Cases", "Incomplete Recent Cases", "Forecasted Cases", "Confidence interval", "Unseen", "CI Lower Bound")
+  colnames(plot_df) <- c("Date", "Observed Cases", "Incomplete Recent Cases", "Forecasted Cases", "Prediction interval", "Unseen", "CI Lower Bound")
   
   ## this outputs the google data to be used in the UI to create the dataframe
   list(
