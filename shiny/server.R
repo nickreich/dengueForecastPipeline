@@ -66,15 +66,17 @@ shinyServer(function(input, output) {
   
   map_df <- data.frame(map_forecasts$pname, map_forecasts[,input$var])
   colnames(map_df)[1] <- "Province"
-  colnames(map_df)[2] <- ifelse(input$var == "cpp", "Cases per 100,000 Population",
-                                "Outbreak Probability")
+  colnames(map_df)[2] <- ifelse(input$var == "cpp", 
+                                "Cases per 100,000 Population",
+                                "Outbreak Probability (%)")
   
   
   
   list(data=googleDataTable(map_df), 
        options = list(
         colorAxis = list(
-         maxValue = max(map_max[input$var=="cpp"], 1, na.rm=T))
+         maxValue = max(map_max[input$var=="cpp"], 
+                        100[input$var=="outbreak_prob"], na.rm=T))
         ))
  })
  

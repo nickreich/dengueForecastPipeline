@@ -24,7 +24,7 @@ shinyUI(fluidPage(
    conditionalPanel(
     condition="input.tabs == 'Map'",
     selectInput("var", "Select Variable", 
-                choices = list("Outbreak Probability" = "outbreak_prob",
+                choices = list("Outbreak Probability (in %)" = "outbreak_prob",
                                "Incidence" = "cpp"))),
    
    conditionalPanel(

@@ -16,6 +16,7 @@ forecasts.info <- file.info(paste0("../forecasts/", forecasts.list2))
 recent.forecast <- which.max(forecasts.info$mtime)
 forecasts <- read.csv(paste0("../forecasts/", forecasts.list2[recent.forecast]))
 forecasts$date <- biweek_to_date(forecasts$biweek, forecasts$year)
+forecasts$outbreak_prob <- round(100*forecasts$outbreak_prob)
 
 ## load thai population data
 data(thai_prov_data)
