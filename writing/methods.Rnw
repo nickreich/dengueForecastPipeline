@@ -76,7 +76,7 @@ Y_{t,i} & \sim & Poisson(\lambda_{t,i} \cdot Y_{t-1,i})
 \end{eqnarray}
 where the lag-1 term $Y_{t-1,i}$ is used as an offset in this model. Furthermore, we explicitly model the rate $\lambda$ as 
 \begin{eqnarray}
-\log \lambda_{t,i} & = & f(t) + \sum_{j\in \mathcal{C}} \sum_{k \in \mathcal{L}} \alpha_{j,k} \log \frac{Y_{t-k,j}+1}{Y_{t-k-1,j}+1}
+\log \lambda_{t,i} & = & f(t) + \sum_{j\in \mathcal{C}} \sum_{k \in \mathcal{L}} \alpha_{j,k} \log \frac{Y_{t-k,j}+1}{Y_{t-k-1,j}+1} \label{eq:spamd_model}
 \end{eqnarray}
 where $\mathcal{C}$ is the set of $J$ most-correlated provinces with province $i$ and $\mathcal{L}$ is the set of lag times used in the model. Additionally $f(t)$ is assumed to be a cyclical cubic spline.
 
@@ -89,5 +89,23 @@ Other versions of spamd models use the following alternative model for $\lambda$
 \log \lambda_{t,i} & = & f(t) + \sum_{j\in \mathcal{C}} \sum_{k \in \mathcal{L}} \alpha_{j,k} \log (Y_{t-k,j}+1)
 \end{eqnarray}
 
+These models are fit using the Generalized Additive Model (GAM) framework, using a penalized cyclic spline with period of one year to estimate $f(t)$. 
+
+\section{Simulating predicted counts}
+To generate predicted counts for future unobserved timepoints, we create stochastic realizations of possible trajectories for each province. For example, if data through time $t$ is used to fit the models for all locations, then a single realization consists of a simulated Markov chain of dependent observations for time points $t+1$, $t+2$, ..., $t+N$, across all provinces. Due to the interrelations between the provinces, as shown in equation \ref{eq:spamd_model}, we simulate counts for all provinces at a single timepoint before moving on to the next timepoint. For a single province and timepoint, an observation is created by drawing from a Poisson distribution with mean given by equation \ref{eq:spamd_model}. Assuming we generate observations for $L$ locations and $N$ timepoints, a single realization consists of $L$ province-level observations at $N$ timepoints, or $L \cdot N$ total observations. This process is repeated $M$ times, to create $M$ separate future possible realizations or trajectories. For a given province and timepoint, this creates an empirical posterior predictive distribution. With $M$ sufficiently large, this distribution can be used to construct prediction intervals for each province-timepoint.
+
+
+\section{Outbreak probabilities}
+We use the empirical posterior predictive distribution to calculate the probability that a location is experiencing an outbreak at timepoint $t+m$. An outbreak is defined as incident cases being larger than a specified number of standard deviations ($r$, set to 2 by default) above a seasonal baseline for a particular province. This a commonly used strategy for defining infectious disease outbreaks, first introduced by Serfling for modeling seasonal influenza in the US [[cite]], and subsequently used in numerous other settings [[cite others]]. To define our seasonal baseline, we use the GAM framework to fit a model with two smooth functions of time to the observed data from each province. The first component is a penalized spline to capture secular trends across the entire time observed. The second component is a smooth cyclic penalized spline (with period of 1 year). A log-linear quasi-Poisson model is fit to the data, with the number of observed cases as the outcome variable and the two penalized splines as the only independent predictors. We say that these baseline seasonal values are $\hat Y_{t,i}$ In addition to estimating the penalized splines themselves, this method also estimates the dispersion of the quasi-Poisson distribution, $\xi$. We compute the the expected standard deviation of this baseline seasonal model at time $t$ to be $\sqrt{\hat Y_{t,i}\cdot \xi}$. Therefore the outbreak threshold is defined to be $O_{t,i} = \hat Y_{t,i} + r\cdot\sqrt{\hat Y_{t,i}\cdot \xi}$, where $r$ is the specified number of standard deviations above baseline to consider an outbreak.
+
+For a given province-timepoint, or ($t,i$) pair, the outbreak probability is calculated as the fraction of the $M$ stochastic realizations greater than $O_{t,i}$.
+
+
+% gam(y~s(yr)+s(tiy, bs="cc"), 
+%     data=data.frame(y=x[i,], yr=x@yr, tiy=x@time.in.yr),
+%     family=quasipoisson)
+% rc[i,] <- predict(mdl, newdata=proj.data, type="response")
+% disp <- summary(mdl)$dispersion
+% rc[i,] <- rc[i,]+epi.level*sqrt(rc[i,]*disp)
 
 \end{document}
