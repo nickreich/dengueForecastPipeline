@@ -3,7 +3,43 @@ require(dplyr)
 require(googleCharts)
 require(cruftery)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+ ## update input$date when actionButton 'back' is clicked
+ observe({
+  ## only run when 'back' is clicked
+  input$back
+  
+  ## use isolate so that action is only run one time
+  isolate({
+   ## if unclicked, do not change weeks
+   if(input$back==0)
+    return()
+   ## find currently set date
+   old.date <- which(names(table(forecasts$date)) == input$date)
+   ## go to previous biweek, unless at first biweek, in which case stay there
+   new.date <- ifelse(old.date-1<1, 1, old.date-1)
+   updateSelectInput(session, "date", selected = names(table(forecasts$date))[new.date])
+   
+  })
+ })
+ 
+ ## update input$date when actionButton 'forward' is clicked
+ observe({
+  input$forward
+  ## use isolate so that action is only run one time
+  isolate({
+   ## if unclicked, do not change weeks
+   if(input$forward==0)
+    return()
+   ## find currently set date
+   old.date <- which(names(table(forecasts$date)) == input$date)
+   ## go to next biweek, unless at last biweek, in which case stay there
+   new.date <- ifelse(old.date+1>6, 6, old.date+1)
+   updateSelectInput(session, "date", selected = names(table(forecasts$date))[new.date])
+   
+  })
+ })
+ 
  
  ## create the plot of the data
  output$plot <- reactive({
@@ -26,8 +62,8 @@ shinyServer(function(input, output) {
    filter(MOPH_Admin_Code %in% moph) %>%
    group_by(biweek, year) %>%
    summarise(predicted_count = round(sum(predicted_count)),
-               ub = round(sum(ub)),
-               lb = round(sum(lb)))
+             ub = round(sum(ub)),
+             lb = round(sum(lb)))
   plot_forecasts$unseen <- plot_forecasts$lb
   
   plot_forecasts$date <- biweek_to_date(plot_forecasts$biweek, plot_forecasts$year)
@@ -51,7 +87,7 @@ shinyServer(function(input, output) {
     vAxis = list(
      viewWindow = list(max = max(plot_counts$count, plot_forecasts$predicted_count)*1.1)
     )
-    ))
+   ))
  })
  
  # create the map of the data
@@ -79,7 +115,7 @@ shinyServer(function(input, output) {
                         100[input$var=="outbreak_prob"], na.rm=T),
          colors = cbbPalette[c(4, 5[input$var=="cpp"], 
                                9[input$var=="outbreak_prob"], 7)])
-        ))
+       ))
  })
  
  output$map_title <- renderUI({

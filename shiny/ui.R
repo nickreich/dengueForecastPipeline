@@ -19,7 +19,10 @@ shinyUI(fluidPage(
    ## in map, allow for timespan selection
    conditionalPanel(
     condition="input.tabs == 'Map'",
-    selectInput("date", "Select Date", choices = names(table(forecasts$date)))),
+    selectInput("date", "Select Date", choices = names(table(forecasts$date))),
+    actionButton("back", "Previous"), actionButton("forward", "Next"),
+    tags$hr()
+    ),
    
    conditionalPanel(
     condition="input.tabs == 'Map'",
