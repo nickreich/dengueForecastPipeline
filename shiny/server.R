@@ -76,7 +76,9 @@ shinyServer(function(input, output) {
        options = list(
         colorAxis = list(
          maxValue = max(map_max[input$var=="cpp"], 
-                        100[input$var=="outbreak_prob"], na.rm=T))
+                        100[input$var=="outbreak_prob"], na.rm=T),
+         colors = cbbPalette[c(4, 5[input$var=="cpp"], 
+                               9[input$var=="outbreak_prob"], 7)])
         ))
  })
  

@@ -74,8 +74,8 @@ shinyUI(fluidPage(
               # set colors
               colorAxis = list(
                #maxValue = map_max,
-               minValue = 0,
-               colors = cbbPalette[c(4, 5, 7)]),
+               minValue = 0),
+               
               
               # set tooltip font size
               tooltip = list(
