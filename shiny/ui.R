@@ -124,18 +124,17 @@ shinyUI(fluidPage(
               
               seriesType = "bars",
               series = list(
-#                "1" = list(
+               "1" = list(
+                type = "line"),
+#                "2" = list(
 #                 type = "line"),
                "2" = list(
-                type = "line"),
-               "3" = list(
                 type = "area"),
-               "4" = list(
+               "3" = list(
                 type = "area", lineWidth=0, pointSize=0, areaOpacity=1, visibleInLegend=FALSE),
-               "5" = list(
+               "4" = list(
                 type = "line", visibleInLegend=FALSE)
               ),
-              
               isStacked = FALSE,
               
               ## set legend fonts
@@ -161,7 +160,8 @@ shinyUI(fluidPage(
               #               ),
               
               ## set colors
-              colors = c(cbbPalette[1], "gray", cbbPalette[2:3], "white", cbbPalette[3]),
+              colors = c(cbbPalette[1], #"gray", 
+                         cbbPalette[2:3], "white", cbbPalette[3]),
               
               ## set point size
               pointSize = 3,
