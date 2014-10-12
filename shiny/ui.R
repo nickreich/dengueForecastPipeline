@@ -10,12 +10,6 @@ shinyUI(fluidPage(
  ## create sidebar
  sidebarLayout(
   sidebarPanel(
-   
-   ## author line
-   h5(paste0("Created by Stephen A Lauer, Krzysztof Sakrejda, and Nicholas G Reich")),
-   
-   tags$hr(),
-   
    ## in map, allow for timespan selection
    conditionalPanel(
     condition="input.tabs == 'Map'",
@@ -40,7 +34,16 @@ shinyUI(fluidPage(
    conditionalPanel(
     condition="input.tabs == 'Plot'",
     selectInput("start", "Select Start Year", choices = seq(2014, 2000, -1), selected = 2013)
-    )
+    ),
+   
+   tags$hr(),
+   
+   ## author line
+   h6("Created by:"),
+   h6("Stephen A Lauer"),
+   h6("Krzysztof Sakrejda"),
+   h6("Nicholas G Reich")
+   
   ),
   
   ## create main panel
@@ -76,7 +79,6 @@ shinyUI(fluidPage(
               
               # set colors
               colorAxis = list(
-               #maxValue = map_max,
                minValue = 0),
                
               

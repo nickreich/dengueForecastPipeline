@@ -111,10 +111,12 @@ shinyServer(function(input, output, session) {
   list(data=googleDataTable(map_df), 
        options = list(
         colorAxis = list(
-         maxValue = max(map_max[input$var=="cpp"], 
-                        100[input$var=="outbreak_prob"], na.rm=T),
-         colors = cbbPalette[c(4, 5[input$var=="cpp"], 
-                               9[input$var=="outbreak_prob"], 7)])
+         maxValue = max(map_max[input$var=="cpp"],
+                        100, na.rm=T),
+         colors = cbbPalette[c(4[input$var=="outbreak_prob"], 5[input$var=="cpp"], 
+                               9[input$var=="outbreak_prob"], 7)])#,
+#         values = c(0, 14[input$var=="cpp"], 50[input$var=="outbreak_prob"], 
+#                    100[input$var=="outbreak_prob"])
        ))
  })
  
