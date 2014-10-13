@@ -34,7 +34,8 @@ shinyServer(function(input, output, session) {
    ## find currently set date
    old.date <- which(names(table(forecasts$date)) == input$date)
    ## go to next biweek, unless at last biweek, in which case stay there
-   new.date <- ifelse(old.date+1>6, 6, old.date+1)
+   num_forecasts <- length(unique(forecasts$date))
+   new.date <- ifelse(old.date+1>num_forecasts, num_forecasts, old.date+1)
    updateSelectInput(session, "date", selected = names(table(forecasts$date))[new.date])
    
   })
