@@ -18,6 +18,19 @@
 \begin{document}
 \maketitle
 
+\section{Introduction}
+
+Producing accurate and actionable forecasts of infectious disease incidence at short and long time scales could improve public health response to outbreaks. Infectious diseases have several characteristics that enable researchers to construct viable forecasting models. 
+
+First, they often (although not always) follow seasonal patterns. Seasonal cycles may be due to different factors that enhance disease transmission. For example, with influenza cold and dry weather has been shown to enhance transmission. Possible explanations for this phenomenon include the virus surviving longer in these conditions and a weakening of human defenses (e.g. mucus membranes become fragile and chapped). For vector-borne diseases, such as malaria, dengue fever, or lyme disease, climactic conditions determine the activity of the disease vector and therefore the rate of disease transmission. Additionally, cultural and social factors can drive disease transmission in predicable ways by increasing or decreasing social contacts around known social events such as school vacations or holiday celebrations, to name a few.
+
+With the maturation of disease surveillance and reporting systems in recent years, real-time disease forecasting has become a realistic goal in certain settings. Recognizing the importance of this emerging field, several governmental agencies have established contests, with the goal to have contestants produce accurate forecasting results. However, researchers and practitioners are still working to understand and establish a set of best practices for conducting real-time forecasting. 
+
+In 2014, our research team, in collaboration with Thailand's Ministry of Public Health, established a procedure for generating real-time forecasts of dengue fever, based on current disease surveillance reports from Thailand.
+
+This manuscript (1) documents the process and methods used to collect, process, and use the data for disease forecasting, (2) presents preliminary results of real-time forecasting of dengue fever in Thailand for the year 2014, and (3) provides a template for the documentation, reporting, and validation of real-time disease forecasts. 
+
+
 \section{Notation and timeline for real-time forecasts}
 
 For a given year, every date is mapped to a particular biweek in that year. We define the first biweek of every year as beginning on January 1st, at 00h00m00s and the last as ending on December 31st, 11h59m59s. Every year is defined to contain exactly 26 biweeks. To make predictions on the biweekly scale, daily case counts are aggregated into their respective biweek. Counts for biweeks that have 15 days are standardized by multiplying the count by $\frac{14}{15}$ and rounding to the nearest integer. The explicit Julian calendar day to biweek mapping is given in Table \ref{tab:biweekMap}.
