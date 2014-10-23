@@ -30,6 +30,21 @@ In 2014, our research team, in collaboration with Thailand's Ministry of Public 
 
 This manuscript (1) documents the process and methods used to collect, process, and use the data for disease forecasting, (2) presents preliminary results of real-time forecasting of dengue fever in Thailand for the year 2014, and (3) provides a template for the documentation, reporting, and validation of real-time disease forecasts. 
 
+\section{Forecasting methods}
+
+\subsection{Data}
+The data presented here comes from the Thai surveillance system, run by the Ministry of Public Health in Nonthaburi, Thailand. Monthly DHF case counts for each province are available from January 1968 through December 2005. Individual case reports (hereafter referred to as ``line-list'' data) are available for DF, DHF, and DSS from January 1, 1999 through the present time (this is the format of the real-time data). The line-list data has information on each particular case, including date of symptom onset, home address-code of the case (similar to a U.S. zip code), disease diagnosis code, and demographic information (sex, marital status, age, etc...). In years where we have overlaping sources for case data, the line-list data is used.
+
+Because the generation time of dengue fever is about two weeks, we chose to model the data on a bi-weekly timescale. Therefore, we aggregate the line-list data into biweekly intervals (see biweek definition below) and interpolate the monthly counts into biweekly counts. The latter interpolation is performed by fitting a monotonically increasing smooth spline to the cumulative case counts in each province, and then taking the differences between the estimated cumulative counts at each interval as the number of incident cases in a given interval.
+
+We chose to use only DHF cases in our modeling for several reasons: (1) DHF is the only disease reported consistently across the 47 years of data collection, (2) DHF is less likely than DF to be misdiagnosed or to be differentially misclassified over time, and (3) from a public health perspective, DHF is a more relevant outcome, as it is a life-threatening condition and requires medical attention.
+
+\subsection{Reporting delays}
+
+\subsection{Real-time data management}
+We have established a secure data transfer process to transmit data from the Thai disease surveillance system to U.S. researchers, so that the data may be easily used to generate forecasts. Thai public health officials transmit data every two weeks to a secure server based in the U.S. These data are then loaded into a PostgreSQL database that contains all data, including the monthly case counts and all line-lists received to date. Currently, this database holds records of 2.5 million unique cases of dengue in Thailand for the years 1968 through 2014. Close to 2 million of those records are DHF cases.
+
+Each unique record is timestamped with a ``delivery date'' when it first is transmitted in a data transfer and is available in the SQL database. This enables us to ``turn back the clock'', i.e. to query data that was available at a particular point in time. This is important for being able to retrospectively assess the performance of models as if they were applied in real-time. Since all case reports have some delay between symptom onset and their delivery date, case counts would be different for the queries "all cases with symptom onset prior to 2014-04-01" and "all cases with delivery date prior to 2014-04-01". For prospective forecasting, we will only ever have the cases with delivery date prior to the current time, so it is vital to be able to query the database in this fashion to return datasets for analysis that provide only the available cases at a particular time. In surveillance systems that may have a much shorter time between symptom onset and case report (e.g. Singapore's all-digital surveillance system reportedly has minimal reporting delays for cases) this concern may be less of an issue. But as described above, reporting delays in the Thai surveillance system differ by province, and may take months to find their way into the official surveillance record.
 
 \section{Notation and timeline for real-time forecasts}
 
