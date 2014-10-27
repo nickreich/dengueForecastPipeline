@@ -20,13 +20,15 @@ if(length(args)==0) {
 FROM_DATE <- as.Date('1968-01-01')
 DELIVERY_DATE <- as.Date(args[1])
 to_date_lag <- 4 # in biweeks
-
+run_full_year <- TRUE
+steps_ahead <- 6
+        
 ## modeling globals
 MODEL <- 'spamd_tops3_lag1'
 
 ## define machine-specific properties/folders
 ## Nick
-CORES <- 20
+CORES <- 4
 root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
 spamd_dir <- '~/Documents/code_versioned/spamd/'
 pgsql <- '~/credentials/sql_zaraza.rds'
@@ -47,7 +49,6 @@ ANALYSIS_DATE <- Sys.Date()
 
 ## set number of computing cores
 options(mc.cores=CORES)
-set.seed(1234)
 
 ## main repo
 setwd(file.path(root_dir, 'dengueForecastPipeline'))
@@ -84,9 +85,16 @@ library(cruftery)
 
 ## set TO_DATE = t_{k-l}
 delivery_biweek <- date_to_biweek(DELIVERY_DATE)
-TO_DATE <- biweek_to_date(delivery_biweek - to_date_lag, year(DELIVERY_DATE))
+TO_DATE <- biweek_to_date(delivery_biweek - to_date_lag, 
+                          year(DELIVERY_DATE))
 to_biweek <- date_to_biweek(TO_DATE)
 to_year <- year(TO_DATE)
+
+## set steps ahead if running full year forecasts
+if(run_full_year) {
+        steps_ahead <- 26 - to_biweek + 1       
+}
+        
 
 ## Load most recent counts data
 counts.list <- list.files(path="counts", pattern = "*.csv")
@@ -94,7 +102,7 @@ counts.info <- file.info(paste0("counts/", counts.list))
 recent.count <- which.max(counts.info$mtime)
 counts <- read.csv(paste0("counts/", counts.list[recent.count]))
 
-# ggplot(new_counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
+# ggplot(counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
 ## subset to onset dates < TO_DATE
 to_time <- to_year + (to_biweek-1)/26
@@ -175,7 +183,7 @@ den_smooth <- smooth.cdata(dat)
 ##    predictionPerformance_09132013a.rda
 den_mdl <- fit.cntry.pred.mdl(den_smooth, num.tops=3, cor.lags=1)
 
-den_forecast <- forecast(den_mdl, den_smooth, steps=6, stochastic=T, verbose=T, 
+den_forecast <- forecast(den_mdl, den_smooth, steps=steps_ahead, stochastic=T, verbose=T, 
                          MC.sims=1000, predictions.only=T, num.cores=CORES)
 
 ########################
@@ -220,7 +228,7 @@ for (i in 1:(den_forecast@n.locs)){
 }
 
 ## get outbreak probabilities
-outbreak_prob <- tbl_df(data.frame(get.outbreak.probability(den_forecast, den_smooth)))
+outbreak_prob <- tbl_df(data.frame(get.outbreak.probability(den_forecast, den_smooth, thresh.type="thai")))
 colnames(outbreak_prob) <- paste(den_forecast@yr, formatC(den_forecast@time.in.yr, width=2, flag="0"))
 outbreak_prob <- outbreak_prob %>% mutate(pid=den_forecast@loc.info@data$FIPS_ADMIN)
 melted_outbreak_prob <- tbl_df(melt(outbreak_prob, id.vars = c("pid")))

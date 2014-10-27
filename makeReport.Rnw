@@ -19,10 +19,6 @@
 \usepackage{setspace}
 \onehalfspacing
 
-
-\title{Real-time Forecasts of Dengue Fever in Thailand}
-\author{Nicholas Reich, Krzysztof Sakrejda, Stephen Lauer, Hannah Clapham, \\ Henrik Salje, Derek Cummings, Justin Lessler}
-
 %%% BEGIN DOCUMENT
 \begin{document}
 
@@ -48,11 +44,11 @@ library(ggplot2)
 #if(length(args)==0)
 # args <- Sys.Date()
 
-DATA_THRU_WEEK <- 38 ## number from Thai filename 
-transmittal_date <- "20140929" ## date data transmitted from thais
+DATA_THRU_WEEK <- 40 ## number from Thai filename 
+transmittal_date <- "20141016" ## date data transmitted from thais
         
-ANALYSIS_DATE <- "20141001" #as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- "20140929" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
+ANALYSIS_DATE <- "20141027" #as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- "20141027" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
 
 
 current_biweek <- date_to_biweek(ymd(transmittal_date))
@@ -101,7 +97,7 @@ counts <- read.csv(file.path('forecasts', counts_file), stringsAsFactors=FALSE)
 \noindent \rule{\textwidth}{1pt}
 
 
-<<map1, fig.height=4, fig.width=2.5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+<<map1, fig.height=4, fig.width=2.5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=FALSE, dev.args=list(bg='transparent')>>=
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
                   include_legend=FALSE,
@@ -109,7 +105,7 @@ plot_forecast_map(forecast_data=forecasts,
                   plot_type="outbreak")
 @
 
-<<map2, fig.height=4, fig.width=2.5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+<<map2, fig.height=4, fig.width=2.5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=FALSE, dev.args=list(bg='transparent')>>=
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
                   include_legend=FALSE,
@@ -117,7 +113,7 @@ plot_forecast_map(forecast_data=forecasts,
                   plot_type="outbreak")
 @
 
-<<map3, fig.height=4, fig.width=5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=TRUE, dev.args=list(bg='transparent')>>=
+<<map3, fig.height=4, fig.width=5, dpi=200, eval=TRUE, echo=FALSE, message=FALSE, dev="png", include=FALSE, cache=FALSE, dev.args=list(bg='transparent')>>=
 plot_forecast_map(forecast_data=forecasts, 
                   cdata=dat, 
                   biweek_to_plot=current_biweek+1, 
@@ -127,7 +123,7 @@ plot_forecast_map(forecast_data=forecasts,
 
 % load all outbreak probability figures
 \begin{figure}[H]
-\caption{Probability of dengue fever outbreaks occuring by province in Thailand. Forecasts are made for biweekly periods. Dates in the figures indicate the first day of the forecasted biweek.  }
+\caption{Probability of dengue fever outbreaks occuring by province in Thailand. An outbreak is when the forecasted cases are more than 2 standard deviations above the average number of cases for the given biweek, across the last 8 years with the the largest epidemic year left out.  Forecasts are made for biweekly periods. Dates in the figures indicate the first day of the forecasted biweek.  }
 \begin{tabular}{lll}
   \includegraphics[width=.25\linewidth]{figure/map1.png} &   \includegraphics[width=.25\linewidth]{figure/map2.png} &   \includegraphics[width=.5\linewidth]{figure/map3.png}
 \end{tabular}
@@ -135,8 +131,8 @@ plot_forecast_map(forecast_data=forecasts,
 
 \noindent \rule{\textwidth}{1pt}
 
-<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
-make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7)
+<<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3.5>>=
+make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7, show_unused_counts=FALSE)
 @
 
 
@@ -211,55 +207,55 @@ counts_prov <- get_count_prov_data(counts, forecasts_prov, min_plot_date)
 @
 
 <<prov_linegraphs_r0, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=0)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=0, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r1, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=1)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=1, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r2, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=2)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=2, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r3, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=3)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=3, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r4, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=4)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=4, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r5, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=5)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=5, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r6, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=6)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=6, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r7, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=7)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=7, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r8, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=8)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=8, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r9, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=9)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=9, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r10, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=10)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=10, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r11, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=11)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=11, show_unused_counts=FALSE)
 @
 
 <<prov_linegraphs_r12, echo=FALSE, message=FALSE, warning=FALSE, fig.height=10>>=
-make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12)
+make_province_prediction_line_graph(forecasts_prov, counts_prov, region=12, show_unused_counts=FALSE)
 @
 
 
