@@ -44,11 +44,11 @@ library(ggplot2)
 #if(length(args)==0)
 # args <- Sys.Date()
 
-DATA_THRU_WEEK <- 40 ## number from Thai filename 
-transmittal_date <- "20141016" ## date data transmitted from thais
+DATA_THRU_WEEK <- 44 ## number from Thai filename 
+transmittal_date <- "20141113" ## date data transmitted from thais
         
-ANALYSIS_DATE <- "20141027" #as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- "20141027" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
+ANALYSIS_DATE <- "20141118" #as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- "20141117" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
 
 
 current_biweek <- date_to_biweek(ymd(transmittal_date))
