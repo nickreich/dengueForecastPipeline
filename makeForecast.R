@@ -20,8 +20,9 @@ if(length(args)==0) {
 FROM_DATE <- as.Date('1968-01-01')
 DELIVERY_DATE <- as.Date(args[1])
 to_date_lag <- 4 # in biweeks
-run_full_year <- TRUE
-steps_ahead <- 6
+run_full_year <- FALSE
+steps_ahead <- 26
+bad_prov_removal <- FALSE
         
 ## modeling globals
 MODEL <- 'spamd_tops3_lag1'
@@ -34,10 +35,10 @@ spamd_dir <- '~/Documents/code_versioned/spamd/'
 pgsql <- '~/credentials/sql_zaraza.rds'
 
 ## Steve
-#CORES <- 2 
-#root_dir <- '~/Documents/' ## parent dir for dengueForecastPipeline repo
-#spamd_dir <- '~/Documents/denguemodeling/spamd/'
-#pgsql <- '~/Documents/credentials/sql_zaraza.rds'
+# CORES <- 2 
+# root_dir <- '~/Documents/' ## parent dir for dengueForecastPipeline repo
+# spamd_dir <- '~/Documents/denguemodeling/spamd/'
+# pgsql <- '~/Documents/credentials/sql_zaraza.rds'
 
 #######################
 ## USE LOCAL OPTIONS ## 
@@ -141,6 +142,59 @@ load("trunk/manuscripts/realTimeForecasting/predictions/THA_adm1.RData") ## load
 ## define locations for which forecasts will be created
 pnames <- as.character(pred_objects$province_names)
 
+## insert NAs for Nong Bua Lam Phu, Amnat Charoen, Sa Kaeo, Mukdahan, Yasothon, Phayao, Udon Thani, Ubon Ratchathani, Prachin Buri, and Chiang Rai
+if(bad_prov_removal == TRUE){
+ idx_NBL <- which(pnames=="Nong Bua Lam Phu")
+ 
+ NBL_first_count <- which(count_matrix[idx_NBL,] != 0)[1]
+ count_matrix[idx_NBL,1:(NBL_first_count-1)] <- NA
+ 
+ idx_AC <- which(pnames=="Amnat Charoen")
+ 
+ AC_first_count <- which(count_matrix[idx_AC,] != 0)[1]
+ count_matrix[idx_AC,1:(AC_first_count-1)] <- NA
+ 
+ idx_SK <- which(pnames=="Sa Kaeo")
+ 
+ SK_first_count <- which(count_matrix[idx_SK,] != 0)[1]
+ count_matrix[idx_SK,1:(SK_first_count-1)] <- NA
+ 
+ idx_M <- which(pnames=="Mukdahan")
+ 
+ M_first_count <- which(count_matrix[idx_M,] != 0)[1]
+ count_matrix[idx_M,1:(M_first_count-1)] <- NA
+ 
+ idx_Y <- which(pnames=="Yasothon")
+ 
+ Y_first_count <- which(count_matrix[idx_Y,] != 0)[1]
+ count_matrix[idx_Y,1:(Y_first_count-1)] <- NA
+ 
+ idx_P <- which(pnames=="Phayao")
+ 
+ P_first_count <- which(count_matrix[idx_P,] != 0)[1]
+ count_matrix[idx_P,1:(P_first_count-1)] <- NA
+ 
+ idx_UT <- which(pnames=="Udon Thani")
+ 
+ UT_first_count <- max(M_first_count, NBL_first_count)
+ count_matrix[idx_UT,1:(UT_first_count-1)] <- NA
+ 
+ idx_UR <- which(pnames=="Ubon Ratchathani")
+ 
+ UR_first_count <- max(Y_first_count, AC_first_count)
+ count_matrix[idx_UR,1:(UR_first_count-1)] <- NA
+ 
+ idx_PB <- which(pnames=="Prachin Buri")
+ 
+ PB_first_count <- SK_first_count
+ count_matrix[idx_PB,1:(PB_first_count-1)] <- NA
+ 
+ idx_CR <- which(pnames=="Chiang Rai")
+ 
+ CR_first_count <- P_first_count
+ count_matrix[idx_CR,1:(CR_first_count-1)] <- NA
+}
+
 ## merging Nong Khai and Bueng Kan
 idx_NK <- which(pnames=="Nong Khai")
 idx_BK <- which(pnames=="Bueng Kan")
@@ -152,7 +206,6 @@ count_matrix <- count_matrix[-idx_BK,]
 fips <- pred_objects$fips[-idx_BK]
 pnames <- pnames[-idx_BK]
 pop <- pred_objects$pop[-idx_BK]
-
 
 ##############################
 ## create a den.data object ##
