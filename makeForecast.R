@@ -22,6 +22,7 @@ DELIVERY_DATE <- as.Date(args[1])
 to_date_lag <- 4 # in biweeks
 run_full_year <- FALSE
 steps_ahead <- 26
+show_seasonality <- TRUE
 bad_prov_removal <- FALSE
         
 ## modeling globals
@@ -235,6 +236,23 @@ den_smooth <- smooth.cdata(dat)
 ##    casePredictionStepsFwd.R
 ##    predictionPerformance_09132013a.rda
 den_mdl <- fit.cntry.pred.mdl(den_smooth, num.tops=3, cor.lags=1)
+
+if(show_seasonality == TRUE){
+ season_data <- matrix(0, nrow = 76, 
+                       ncol = den_mdl@loc.mdls[[1]]@num.tops + 
+                        length(den_mdl@loc.mdls[[1]]@mdl[[1]]) + 1)
+ season_data[,1] <- seq(1, 76, 1)
+ for(i in 1:length(den_mdl@loc.mdls)){
+  season_data[i,c(2:dim(season_data)[2])] <- c(den_mdl@loc.mdls[[i]]@tops,
+                                               den_mdl@loc.mdls[[i]]@mdl[[1]])
+ }
+ season_data <- as.data.frame(season_data)
+ colnames(season_data) <- c("Province", 
+                            paste0("top", seq(1,den_mdl@loc.mdls[[1]]@num.tops, 1)),
+                            names(den_mdl@loc.mdls[[1]]@mdl[[1]]))
+ write.csv(season_data, file.path(aggregated_data_dir, paste0("season_data", DELIVERY_DATE_STRING, ".csv")))
+ 
+}
 
 den_forecast <- forecast(den_mdl, den_smooth, steps=steps_ahead, stochastic=T, verbose=T, 
                          MC.sims=1000, predictions.only=T, num.cores=CORES)
