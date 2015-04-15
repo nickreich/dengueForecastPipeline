@@ -1,7 +1,3 @@
-## load necessary libraries
-require(googleCharts)
-require(dplyr)
-
 shinyUI(fluidPage(
  ## this starts the googleCharts engine
  googleChartsInit(),

@@ -1,20 +1,17 @@
-require(dplyr)
-require(cruftery)
+library(dplyr)
+library(googleCharts)
+library(dengueThailand)
+library(spatialpred)
 
 ## load most recent counts
-counts.list <- list.files(path="counts", pattern = "*.csv")
-counts.info <- file.info(paste0("counts/", counts.list))
-recent.count <- which.max(counts.info$mtime)
-counts <- read.csv(paste0("counts/", counts.list[recent.count]))
+counts.file <- list.files(pattern = "counts")
+counts <- read.csv(counts.file)
 
 counts$date <- biweek_to_date(counts$date_sick_biweek, counts$date_sick_year)
 
 ## load most recent forecasts
-forecasts.list <- list.files(path="forecasts", pattern = "*.csv")
-forecasts.list2 <- forecasts.list[grep(pattern = "_forecast_", forecasts.list)]
-forecasts.info <- file.info(paste0("forecasts/", forecasts.list2))
-recent.forecast <- which.max(forecasts.info$mtime)
-forecasts <- read.csv(paste0("forecasts/", forecasts.list2[recent.forecast]))
+forecasts.file <- list.files(pattern = "forecast")
+forecasts <- read.csv(forecasts.file)
 forecasts$date <- biweek_to_date(forecasts$biweek, forecasts$year)
 forecasts$outbreak_prob <- round(100*forecasts$outbreak_prob)
 

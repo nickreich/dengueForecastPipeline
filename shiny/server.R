@@ -1,8 +1,3 @@
-## load necessary libraries
-require(dplyr)
-require(googleCharts)
-require(cruftery)
-
 shinyServer(function(input, output, session) {
  ## update input$date when actionButton 'back' is clicked
  observe({
