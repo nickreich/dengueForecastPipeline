@@ -16,17 +16,19 @@ library(RPostgreSQL)
 library(reshape2)
 library(dplyr)
 library(httr)
-library(devtools)
+# library(devtools)
+library(spatialpred)
+library(dengueThailand)
 
 ## load and store version for cruftery
 response <- GET("https://api.github.com/repos/sakrejda/cruftery/git/refs/heads/master")
 cruftery_github_hash <- content(response)[['object']][['sha']]
 
-install_github(rep='sakrejda/cruftery/package_dir', ref=cruftery_github_hash)
-library(cruftery)
+# install_github(rep='sakrejda/cruftery/package_dir', ref=cruftery_github_hash)
+# library(cruftery)
 
 # Steve pgsql
-#pgsql <- '~/Documents/credentials/sql_zaraza.rds'
+# pgsql <- '~/Documents/credentials/sql_zaraza.rds'
 
 # Nick pgsql
  pgsql <- '~/credentials/sql_zaraza.rds'

@@ -1,15 +1,15 @@
 ## master file for running forecasts of dengue in Thailand
 ## Nicholas Reich, Stephen Lauer
-## September 2014
+## April 2015
 
 ## for shell script
 options(echo=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
 
 if(length(args)==0) {
-        args <- Sys.Date()
+ args <- Sys.Date()
 } else {
-       args <- as.Date(args)
+ args <- as.Date(args)
 }
 
 #######################
@@ -20,11 +20,11 @@ if(length(args)==0) {
 FROM_DATE <- as.Date('1968-01-01')
 DELIVERY_DATE <- as.Date(args[1])
 to_date_lag <- 4 # in biweeks
-run_full_year <- FALSE
-steps_ahead <- 26
-show_seasonality <- TRUE
-bad_prov_removal <- FALSE
-        
+run_full_year <- TRUE
+steps_ahead <- 30
+show_seasonality <- FALSE
+bad_prov_removal <- TRUE
+
 ## modeling globals
 MODEL <- 'spamd_tops3_lag1'
 
@@ -71,15 +71,16 @@ library(RPostgreSQL)
 library(reshape2)
 library(dplyr)
 library(httr)
-library(devtools)
+# library(devtools)
 
 ## load and store version for cruftery
 response <- GET("https://api.github.com/repos/sakrejda/cruftery/git/refs/heads/master")
 cruftery_github_hash <- content(response)[['object']][['sha']]
 
-install_github(rep='sakrejda/cruftery/package_dir', ref=cruftery_github_hash)
-library(cruftery)
-
+# install_github(rep='sakrejda/cruftery/package_dir', ref=cruftery_github_hash)
+# library(cruftery)
+library(spatialpred)
+library(dengueThailand)
 
 #######################
 ## pull data from DB ##
@@ -94,9 +95,9 @@ to_year <- year(TO_DATE)
 
 ## set steps ahead if running full year forecasts
 if(run_full_year) {
-        steps_ahead <- 26 - to_biweek + 1       
+ steps_ahead <- 26 - to_biweek + 1       
 }
-        
+
 
 ## Load most recent counts data
 counts.list <- list.files(path="counts", pattern = "*.csv")
@@ -109,9 +110,9 @@ counts <- read.csv(paste0("counts/", counts.list[recent.count]))
 ## subset to onset dates < TO_DATE
 to_time <- to_year + (to_biweek-1)/26
 counts_subset <- counts %>%
-        filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time) %>%
-        group_by(disease, date_sick_year, date_sick_biweek, province) %>%
-        summarize(count=sum(count))
+ filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time) %>%
+ group_by(disease, date_sick_year, date_sick_biweek, province) %>%
+ summarize(count=sum(count))
 
 ## put into wide format, save all objects needed for prediction to aggregated_data
 pred_objects <- create_standard_wide_format(counts_subset, keep_codes=26, 
@@ -121,7 +122,7 @@ fname <- paste0("counts_through_", DELIVERY_DATE_STRING, ".RData")
 save(pred_objects, file=file.path(aggregated_data_dir, fname))
 
 count_matrix <- pred_objects$count_matrix
-        
+
 
 ####################################
 ## source the spamd modeling code ##
@@ -129,9 +130,9 @@ count_matrix <- pred_objects$count_matrix
 
 setwd(spamd_dir)
 spamd_version <- system('svn info |grep Revision: |cut -c11-', intern=TRUE)
-source("trunk/source/dengpred/R/Utility.r")
-source.deng.pred("trunk/source/dengpred/R/")
-source("trunk/manuscripts/realTimeForecasting/code/spatialPlotting.R")
+# source("trunk/source/dengpred/R/Utility.r")
+# source.deng.pred("trunk/source/dengpred/R/")
+# source("trunk/manuscripts/realTimeForecasting/code/spatialPlotting.R")
 ## load(file.path(aggregated_data_dir, fname)) ## only needed if starting from this point
 
 #############################
@@ -254,8 +255,7 @@ if(show_seasonality == TRUE){
  
 }
 
-den_forecast <- forecast(den_mdl, den_smooth, steps=steps_ahead, stochastic=T, verbose=T, 
-                         MC.sims=1000, predictions.only=T, num.cores=CORES)
+den_forecast <- forecast(den_mdl, den_smooth, steps=steps_ahead, stochastic=T, verbose=T, MC.sims=1000, predictions.only=T, num.cores=CORES)
 
 ########################
 ## save forecast data ##
@@ -272,43 +272,43 @@ forecasts <- tbl_df(melt(forecast_data, id.vars = c("pid", "pname", "numid")))
 
 ## add dates, round counts, drop unneeded columns
 forecasts <- 
-        forecasts %>% 
-        mutate(biweek = as.numeric(substr(variable, 7, 8)),
-               year = as.numeric(substr(variable, 2, 5)),
-               predicted_count = round(value),
-               model = MODEL,
-               from_date = FROM_DATE,
-               to_date = TO_DATE,
-               delivery_date = DELIVERY_DATE,
-               analysis_date = ANALYSIS_DATE,
-               analysis_biweek = date_to_biweek(ANALYSIS_DATE),
-               repo1_name = "dengueForecastPipeline-github",
-               repo1_hash = dFP_github_hash,
-               repo2_name = "cruftery-github",
-               repo2_hash = cruftery_github_hash,
-               repo3_name = "spamd-springloops",
-               repo3_hash = spamd_version) %>%
-        select(-variable, -value)
+ forecasts %>% 
+ mutate(biweek = as.numeric(substr(variable, 7, 8)),
+        year = as.numeric(substr(variable, 2, 5)),
+        predicted_count = round(value),
+        model = MODEL,
+        from_date = FROM_DATE,
+        to_date = TO_DATE,
+        delivery_date = DELIVERY_DATE,
+        analysis_date = ANALYSIS_DATE,
+        analysis_biweek = date_to_biweek(ANALYSIS_DATE),
+        repo1_name = "dengueForecastPipeline-github",
+        repo1_hash = dFP_github_hash,
+        repo2_name = "cruftery-github",
+        repo2_hash = cruftery_github_hash,
+        repo3_name = "spamd-springloops",
+        repo3_hash = spamd_version) %>%
+ select(-variable, -value)
 
 ## add prediction intervals
 forecasts$lb <- forecasts$ub <- NA
 
 for (i in 1:(den_forecast@n.locs)){
-        idx <- which(forecasts$numid == i)
-        forecasts[idx,c("lb", "ub")] <- predint(den_forecast, i, 0.95)
+ idx <- which(forecasts$numid == i)
+ forecasts[idx,c("lb", "ub")] <- predint(den_forecast, i, 0.95)
 }
 
 ## get outbreak probabilities
 outbreak_prob <- tbl_df(data.frame(get.outbreak.probability(den_forecast, den_smooth, thresh.type="thai")))
 colnames(outbreak_prob) <- paste(den_forecast@yr, formatC(den_forecast@time.in.yr, width=2, flag="0"))
-outbreak_prob <- outbreak_prob %>% mutate(pid=den_forecast@loc.info@data$FIPS_ADMIN)
+outbreak_prob$pid <- den_forecast@loc.info@data$FIPS_ADMIN
 melted_outbreak_prob <- tbl_df(melt(outbreak_prob, id.vars = c("pid")))
 melted_outbreak_prob <- 
-        melted_outbreak_prob %>%
-        mutate(biweek = as.numeric(substr(variable, 6, 8)),
-               year = as.numeric(substr(variable, 1, 4)),
-               outbreak_prob = value) %>%
-        select(-variable, -value)
+ melted_outbreak_prob %>%
+ mutate(biweek = as.numeric(substr(variable, 6, 8)),
+        year = as.numeric(substr(variable, 1, 4)),
+        outbreak_prob = value) %>%
+ select(-variable, -value)
 
 ## join forecasts and outbreak probabilities
 forecasts <- left_join(forecasts, melted_outbreak_prob)
@@ -340,7 +340,7 @@ counts_file <- paste0(format(Sys.Date(), "%Y%m%d"),
                       DELIVERY_DATE_STRING, 
                       '.csv')
 write.csv(counts, file=file.path(root_dir, 
-                         'dengueForecastPipeline',
-                         'forecasts',
-                         counts_file), row.names=FALSE)
+                                 'dengueForecastPipeline',
+                                 'forecasts',
+                                 counts_file), row.names=FALSE)
 
