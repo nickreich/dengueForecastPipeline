@@ -144,7 +144,9 @@ load("trunk/manuscripts/realTimeForecasting/predictions/THA_adm1.RData") ## load
 ## define locations for which forecasts will be created
 pnames <- as.character(pred_objects$province_names)
 
-## insert NAs for Nong Bua Lam Phu, Amnat Charoen, Sa Kaeo, Mukdahan, Yasothon, Phayao, Udon Thani, Ubon Ratchathani, Prachin Buri, and Chiang Rai
+## insert NAs until first non-zero occurrence for province and its children: 
+## Nong Bua Lam Phu, Amnat Charoen, Sa Kaeo, Mukdahan, Yasothon, 
+## Phayao, Udon Thani, Ubon Ratchathani, Prachin Buri, and Chiang Rai
 if(bad_prov_removal == TRUE){
  idx_NBL <- which(pnames=="Nong Bua Lam Phu")
  

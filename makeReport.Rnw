@@ -7,6 +7,7 @@
 \usepackage{amssymb,amsmath}
 \geometry{letterpaper, top=1in, left=1in, right=1in, bottom=1in} % to set margins
 
+\usepackage{multirow}
 
 % for suppressing figure numbers in captions.
 \usepackage{caption}
@@ -26,10 +27,10 @@
 %\maketitle
 
 
-<<installCruftery, echo=FALSE, message=FALSE, warning=FALSE>>=
+<<load-packages, echo=FALSE, message=FALSE, warning=FALSE>>=
 library(devtools)
-install_github(rep='sakrejda/cruftery/package_dir')
-library(cruftery)
+library(dengueThailand)
+library(spatialpred)
 @
 
 
@@ -44,17 +45,19 @@ library(ggplot2)
 #if(length(args)==0)
 # args <- Sys.Date()
 
-DATA_THRU_WEEK <- 44 ## number from Thai filename 
-transmittal_date <- "20141113" ## date data transmitted from thais
+DATA_THRU_WEEK <- 14 ## number from Thai filename 
+transmittal_date <- "20150416" ## date data transmitted from thais
         
-ANALYSIS_DATE <- "20141118" #as.character(Sys.Date(), "%Y%m%d")
-DELIVERY_DATE <- "20141117" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
+ANALYSIS_DATE <- "20150423" #as.character(Sys.Date(), "%Y%m%d")
+DELIVERY_DATE <- "20150423" #as.character(Sys.Date(), "%Y%m%d") ## del date used in data pulls
 
 
 current_biweek <- date_to_biweek(ymd(transmittal_date))
 biweek_lag <- 4
 
 min_plot_date <- as.Date('2012-04-01')
+
+report_year <- year(ymd(transmittal_date))
 @
 
 
@@ -125,14 +128,14 @@ plot_forecast_map(forecast_data=forecasts,
 \begin{figure}[H]
 \caption{Probability of dengue fever outbreaks occuring by province in Thailand. An outbreak is when the forecasted cases are more than 2 standard deviations above the average number of cases for the given biweek, across the last 8 years with the the largest epidemic year left out.  Forecasts are made for biweekly periods. Dates in the figures indicate the first day of the forecasted biweek.  }
 \begin{tabular}{lll}
-  \includegraphics[width=.25\linewidth]{figure/map1.png} &   \includegraphics[width=.25\linewidth]{figure/map2.png} &   \includegraphics[width=.5\linewidth]{figure/map3.png}
+  \includegraphics[width=.25\linewidth]{figure/map1-1.png} &   \includegraphics[width=.25\linewidth]{figure/map2-1.png} &   \includegraphics[width=.5\linewidth]{figure/map3-1.png}
 \end{tabular}
 \end{figure}
 
 \noindent \rule{\textwidth}{1pt}
 
 <<cntryLinegraph, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3.5>>=
-make_country_prediction_line_graph(forecasts, counts, ylim_scale=1.7, show_unused_counts=FALSE)
+make_country_prediction_line_graph(forecasts, counts, ylim_scale=3, show_unused_counts=FALSE)
 @
 
 
@@ -146,22 +149,22 @@ Based on historical reporting patterns, we have seen that most provinces take up
 
 
 \begin{table}[htdp]
-\caption{Summary of relevant dates for this report}
+\caption{Summary of relevant dates for this report.}
 \begin{center}
 \begin{tabular}{rl}
-Data received through: & Week \Sexpr{DATA_THRU_WEEK}, \Sexpr{year(ymd(transmittal_date))} \\
+Data received through: & Week \Sexpr{DATA_THRU_WEEK}, \Sexpr{report_year} \\
 Most recent data transfer: & \Sexpr{format(ymd(transmittal_date), "%d %B %Y")} (in biweek \Sexpr{current_biweek})\\
 Data assumed complete through: & \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(transmittal_date)))-1, "%d %B %Y")} (end of biweek \Sexpr{current_biweek-biweek_lag-1})  \\
-Forecasts made for: 
-& biweek \Sexpr{current_biweek-biweek_lag} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+1} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+1, year(ymd(transmittal_date))), "%d %B %Y")}) \\
-& biweek \Sexpr{current_biweek-biweek_lag+2} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+2, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+3} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+3, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+4} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+4, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
-& biweek \Sexpr{current_biweek-biweek_lag+5} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+5, year(ymd(transmittal_date))), "%d %B %Y")}) \\
+Forecasts made for: & all remaining biweeks in \Sexpr{format(ymd(transmittal_date), "%Y")}
+% & biweek \Sexpr{current_biweek-biweek_lag} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+% & biweek \Sexpr{current_biweek-biweek_lag+1} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+1, year(ymd(transmittal_date))), "%d %B %Y")}) \\
+% & biweek \Sexpr{current_biweek-biweek_lag+2} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+2, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+% & biweek \Sexpr{current_biweek-biweek_lag+3} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+3, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+% & biweek \Sexpr{current_biweek-biweek_lag+4} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+4, year(ymd(transmittal_date))), "%d %B %Y")}) \\ 
+% & biweek \Sexpr{current_biweek-biweek_lag+5} (starts on \Sexpr{format(biweek_to_date(current_biweek-biweek_lag+5, year(ymd(transmittal_date))), "%d %B %Y")}) \\
 \end{tabular}
 \end{center}
-\label{default}
+\label{tab:forecast-summary}
 \end{table}%
 
 %\section*{Key results}
@@ -176,6 +179,50 @@ Forecasts made for:
 %        \item add more informative temporal labels on spatial graphic
         
 %\end{itemize}
+
+<<make-full-year-estimate, warning=FALSE, message=FALSE, echo=FALSE, results='asis'>>=
+library(xtable)
+data(thai_prov_data)
+tpd <- thai_prov_data %>% 
+        transmute(province_num=ISO,
+                  province_fips=FIPS,
+                  province_name=reorder(Province, Population),
+                  health_region=MOPH_Admin_Code)
+first_biweek_predicted <- min(forecasts$biweek)
+region_counts <- tbl_df(counts) %>% 
+        filter(date_sick_year == report_year, disease==26, date_sick_biweek<first_biweek_predicted) %>%
+        left_join(tpd, by=c("province" = "province_num")) %>%
+        group_by(health_region) %>%
+        summarize(region_total_observed=sum(count))
+region_counts_last_yr <- tbl_df(counts) %>% 
+        filter(date_sick_year == report_year-1, disease==26) %>%
+        left_join(tpd, by=c("province" = "province_num")) %>%
+        group_by(health_region) %>%
+        summarize(region_total_observed_last_yr=sum(count))
+region_forecasts <- tbl_df(forecasts) %>%
+        left_join(tpd, by=c("pid" = "province_fips")) %>%
+        group_by(health_region) %>%
+        summarize(region_total_forecasted=sum(predicted_count),
+                  region_lb=sum(lb),
+                  region_ub=sum(ub))
+region_totals <- left_join(region_counts, region_forecasts) %>% 
+        left_join(region_counts_last_yr) %>%
+        mutate(region_total_forecasted = region_total_forecasted+region_total_observed,
+               region_lb = region_lb+region_total_observed,
+               region_ub = region_ub+region_total_observed)
+
+cnames <- c(" 
+            & \\multicolumn{2}{c}{\\bf counts for this year} & \\multicolumn{2}{c|}{\\bf 95\\% CI} & \\bf counts for last year \\\\
+            MOPH Region & observed & predicted & lower & upper & observed \\\\
+            ")
+print(xtable(round(region_totals), digits=0, align="cc|cccc|c",
+             caption="Predictions for full year."), 
+      include.rownames=FALSE, include.colnames=FALSE,
+      add.to.row = list(pos=list(0), command=cnames),
+      hline.after=0, caption.placement="top")
+@
+
+
 
 
 <<allDataCheck, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE>>=
@@ -201,7 +248,7 @@ ggplot(counts_prov_name) + theme_bw() +
 
 
 
-<<dataPrep, echo=FALSE, message=FALSE>>=
+<<dataPrep, echo=FALSE, message=FALSE, warning=FALSE>>=
 forecasts_prov <- get_forecast_prov_data(forecasts)
 counts_prov <- get_count_prov_data(counts, forecasts_prov, min_plot_date)
 @
