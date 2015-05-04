@@ -4,14 +4,18 @@ library(dengueThailand)
 library(spatialpred)
 
 ## load most recent counts
-counts.file <- list.files(pattern = "counts")
-counts <- read.csv(counts.file)
+counts_file <- list.files(pattern = "counts")
+counts_info <- file.info(counts_file)
+recent_counts <- which.max(counts_info$ctime)
+counts <- read.csv(counts_file[recent_counts])
 
-counts$date <- biweek_to_date(counts$date_sick_biweek, counts$date_sick_year)
+counts$date <- biweek_to_date(counts$biweek, counts$year)
 
 ## load most recent forecasts
-forecasts.file <- list.files(pattern = "forecast")
-forecasts <- read.csv(forecasts.file)
+forecasts_file <- list.files(pattern = "forecast")
+forecasts_info <- file.info(forecasts_file)
+recent_forecasts <- which.max(forecasts_info$ctime)
+forecasts <- read.csv(forecasts_file[recent_forecasts])
 forecasts$date <- biweek_to_date(forecasts$biweek, forecasts$year)
 forecasts$outbreak_prob <- round(100*forecasts$outbreak_prob)
 

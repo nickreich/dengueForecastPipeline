@@ -31,7 +31,8 @@ shinyServer(function(input, output, session) {
    ## go to next biweek, unless at last biweek, in which case stay there
    num_forecasts <- length(unique(forecasts$date))
    new.date <- ifelse(old.date+1>num_forecasts, num_forecasts, old.date+1)
-   updateSelectInput(session, "date", selected = names(table(forecasts$date))[new.date])
+   updateSelectInput(session, "date",
+                     selected = names(table(forecasts$date))[new.date])
    
   })
  })
@@ -45,16 +46,19 @@ shinyServer(function(input, output, session) {
    moph <- seq(0, 12)
   
   ## format counts into plot format 
-  plot_counts <- merge(counts, thai_prov_data, by="province", all.x=T) %>%
-   filter(disease == 26, date_sick_year >= input$start, MOPH_Admin_Code %in% moph) %>%
-   group_by(date_sick_biweek, date_sick_year) %>%
+  plot_counts <- merge(counts, thai_prov_data, by.x="pid", by.y="FIPS",
+                       all.x=T) %>%
+   filter(year >= input$start,
+          MOPH_Admin_Code %in% moph) %>%
+   group_by(biweek, year) %>%
    summarise(count = round(sum(count)))
   
   ## add date variable
-  plot_counts$date <- biweek_to_date(plot_counts$date_sick_biweek, 
-                                     plot_counts$date_sick_year)
+  plot_counts$date <- biweek_to_date(plot_counts$biweek, 
+                                     plot_counts$year)
   
-  plot_forecasts <- merge(forecasts, thai_prov_data, by.x="pid", by.y="FIPS", all.x=T) %>%
+  plot_forecasts <- merge(forecasts, thai_prov_data, by.x="pid",
+                          by.y="FIPS", all.x=T) %>%
    filter(MOPH_Admin_Code %in% moph) %>%
    group_by(biweek, year) %>%
    summarise(predicted_count = round(sum(predicted_count)),
@@ -91,15 +95,17 @@ shinyServer(function(input, output, session) {
  
  # create the map of the data
  output$map <- reactive({
-  map_forecasts <- merge(forecasts, thai_prov_data, by.x = "pid", by.y = "FIPS", all.x=T) %>%
+  map_forecasts <- merge(forecasts, thai_prov_data, by.x = "pid",
+                         by.y = "FIPS", all.x=T) %>%
    filter(date == as.Date(input$date))
   
   map_forecasts$cpp <- round(100000*map_forecasts$predicted_count/map_forecasts$Population)
   
-  map_forecasts$pname <- ifelse(map_forecasts$pname == "Bangkok Metropolis", "Bangkok",
-                                as.character(map_forecasts$pname))
+  map_forecasts$Province <- ifelse(map_forecasts$Province == "Bangkok Metropolis",
+                                   "Bangkok",
+                                   as.character(map_forecasts$Province))
   
-  map_df <- data.frame(map_forecasts$pname, map_forecasts[,input$var])
+  map_df <- data.frame(map_forecasts$Province, map_forecasts[,input$var])
   colnames(map_df)[1] <- "Province"
   colnames(map_df)[2] <- ifelse(input$var == "cpp", 
                                 "Cases per 100,000 Population",
@@ -112,8 +118,11 @@ shinyServer(function(input, output, session) {
         colorAxis = list(
          maxValue = max(map_max[input$var=="cpp"],
                         100, na.rm=T),
-         colors = cbbPalette[c(4[input$var=="outbreak_prob"], 5[input$var=="cpp"], 
-                               9[input$var=="outbreak_prob"], 7)])#,
+         colors = c("#053061",
+                    "#CCCCCC"[input$var=="outbreak_prob"],
+                    "#FF2C19"[input$var=="outbreak_prob"],
+                    cbbPalette[c(5[input$var=="cpp"],
+                                 7[input$var=="cpp"])]))#,
 #         values = c(0, 14[input$var=="cpp"], 50[input$var=="outbreak_prob"], 
 #                    100[input$var=="outbreak_prob"])
        ))
