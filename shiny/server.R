@@ -95,36 +95,47 @@ shinyServer(function(input, output, session) {
  
  # create the map of the data
  output$map <- reactive({
+   # browser()
   map_forecasts <- merge(forecasts, thai_prov_data, by.x = "pid",
                          by.y = "FIPS", all.x=T) %>%
    filter(date == as.Date(input$date))
   
-  map_forecasts$cpp <- round(100000*map_forecasts$predicted_count/map_forecasts$Population)
+  map_forecasts$cpp <- round(100000*map_forecasts$predicted_count/map_forecasts$Population, 2)
+#   if(input$var == "cpp")
+#     map_forecasts$color <- round(log10(map_forecasts$cpp),1)
+#   if(input$var == "outbreak_prob")
+#     map_forecasts$color <- map_forecasts$outbreak_prob
   
   map_forecasts$Province <- ifelse(map_forecasts$Province == "Bangkok Metropolis",
                                    "Bangkok",
                                    as.character(map_forecasts$Province))
   
-  map_df <- data.frame(map_forecasts$Province, map_forecasts[,input$var])
-  colnames(map_df)[1] <- "Province"
+  map_df <- map_forecasts[,c("Province", input$var, 
+                             # "cpp"[input$var == "outbreak_prob"],
+                             "outbreak_prob"[input$var=="cpp"],
+                             "predicted_count"[input$var=="outbreak_prob"])]
+
   colnames(map_df)[2] <- ifelse(input$var == "cpp", 
                                 "Cases per 100,000 Population",
                                 "Outbreak Probability (%)")
   
-  
-  
+  colnames(map_df)[3] <- ifelse(input$var == "outbreak_prob", 
+                                "Predicted Number of Cases",
+                                "Outbreak Probability (%)")
+#   
   list(data=googleDataTable(map_df), 
        options = list(
         colorAxis = list(
+         # minValue = min(0[input$var=="outbreak_prob"], map_min[input$var=="cpp"], na.rm=TRUE),
          maxValue = max(map_max[input$var=="cpp"],
-                        100, na.rm=T),
-         colors = c("#053061",
+                        100[input$var=="outbreak_prob"], na.rm=T),
+         colors = c("#053061"[input$var=="outbreak_prob"],
                     "#CCCCCC"[input$var=="outbreak_prob"],
                     "#FF2C19"[input$var=="outbreak_prob"],
                     cbbPalette[c(5[input$var=="cpp"],
                                  7[input$var=="cpp"])]))#,
-#         values = c(0, 14[input$var=="cpp"], 50[input$var=="outbreak_prob"], 
-#                    100[input$var=="outbreak_prob"])
+        # values = c(0, 14[input$var=="cpp"], 50[input$var=="outbreak_prob"], 
+                   # 100[input$var=="outbreak_prob"])
        ))
  })
  

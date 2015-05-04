@@ -17,7 +17,7 @@ forecasts_info <- file.info(forecasts_file)
 recent_forecasts <- which.max(forecasts_info$ctime)
 forecasts <- read.csv(forecasts_file[recent_forecasts])
 forecasts$date <- biweek_to_date(forecasts$biweek, forecasts$year)
-forecasts$outbreak_prob <- round(100*forecasts$outbreak_prob)
+forecasts$outbreak_prob <- round(forecasts$outbreak_prob)
 
 ## load thai population data
 data(thai_prov_data)
@@ -26,9 +26,9 @@ data(thai_prov_data)
 mapMaxdf <- merge(forecasts, thai_prov_data, by.x = "pid", by.y = "FIPS", all.x=T)
 
 ## calculate predicted cases per 100,000 population
-mapMaxdf$cpp <- round(100000*mapMaxdf$predicted_count/mapMaxdf$Population)
+mapMaxdf$cpp <- round(100000*mapMaxdf$predicted_count/mapMaxdf$Population,2)
 
-map_max <- max(mapMaxdf$cpp, na.rm=T)
+map_max <- max(ceiling(mapMaxdf$cpp), na.rm=T)
 map_min <- min(mapMaxdf$cpp, na.rm=T)
 
 ## set graph colors (special for colorblind people)
