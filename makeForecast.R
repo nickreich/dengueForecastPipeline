@@ -105,13 +105,13 @@ counts.info <- file.info(paste0("counts/", counts.list))
 recent.count <- which.max(counts.info$mtime)
 counts <- read.csv(paste0("counts/", counts.list[recent.count]))
 
-# ggplot(counts) + geom_raster(aes(x=date_sick_year+date_sick_biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
+# ggplot(counts) + geom_raster(aes(x=year+biweek/26, y=province, fill=count)) + facet_wrap(~disease, ncol=1, scales="free_x")
 
 ## subset to onset dates < TO_DATE
 to_time <- to_year + (to_biweek-1)/26
 counts_subset <- counts %>%
- filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time) %>%
- group_by(disease, date_sick_year, date_sick_biweek, province) %>%
+ filter( (year+(biweek-1)/26) < to_time) %>%
+ group_by(disease, year, biweek, province) %>%
  summarize(count=sum(count))
 
 ## put into wide format, save all objects needed for prediction to aggregated_data
@@ -257,7 +257,7 @@ if(show_seasonality == TRUE){
  
 }
 
-den_forecast <- forecast(den_mdl, den_smooth, steps=steps_ahead, stochastic=T, verbose=T, MC.sims=1000, predictions.only=T, num.cores=CORES)
+den_forecast <- forecast(den_mdl, dat, steps=steps_ahead, stochastic=T, verbose=T, MC.sims=1000, predictions.only=T, num.cores=CORES)
 
 ########################
 ## save forecast data ##
