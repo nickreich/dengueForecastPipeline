@@ -79,8 +79,8 @@ shinyServer(function(input, output, session) {
   plot_df <- select(plot_df, date, count, #unused, 
                     predicted_count, ub, unseen, lb)
   
-  colnames(plot_df) <- c("Date", "Observed Cases",# "Incomplete Recent Cases",
-                         "Forecasted Cases", "Prediction interval", "Unseen", 
+  colnames(plot_df) <- c("Date", "Observed cases",# "Incomplete Recent Cases",
+                         "Forecasted cases", "Prediction interval", "Unseen", 
                          "CI Lower Bound")
   
   ## this outputs the google data to be used in the UI to create the dataframe
@@ -116,11 +116,11 @@ shinyServer(function(input, output, session) {
                              "predicted_count"[input$var=="outbreak_prob"])]
 
   colnames(map_df)[2] <- ifelse(input$var == "cpp", 
-                                "Cases per 100,000 Population",
-                                "Outbreak Probability (%)")
+                                "Cases per 100,000 population",
+                                "Outbreak probability (%)")
   
   colnames(map_df)[3] <- ifelse(input$var == "outbreak_prob", 
-                                "Predicted Number of Cases",
+                                "Predicted number of cases",
                                 "Outbreak Probability (%)")
 #   
   list(data=googleDataTable(map_df), 
@@ -141,7 +141,7 @@ shinyServer(function(input, output, session) {
  
  output$map_title <- renderUI({
   ifelse(input$var=="cpp", "Forecasted dengue cases per 100,000 inhabitants",
-         "Probability of dengue outbreak occurrence")
+         "Probability of dengue outbreak occurrence (%)")
  })
  
  output$plot_title <- renderUI({
@@ -150,6 +150,49 @@ shinyServer(function(input, output, session) {
   if(input$moph==0)
    return("Observed and forecasted cases of dengue fever in Bangkok")
   return(paste("Observed and forecasted cases of dengue fever in MOPH Region", input$moph))
+ })
+ 
+ output$legend <- renderPlot({
+   if(input$var == 'outbreak_prob'){
+     
+     paint.brush = colorRampPalette(c("#053061", "#CCCCCC", "#FF2C19"))
+     cols <- paint.brush(101)
+     leg_dat <- data_frame(y = seq(0, 100), x = 1, col = cols)
+     
+     p <- ggplot(data = leg_dat) +
+       geom_tile(aes(y = y, fill = col, x = x), show_guide = FALSE) +
+       scale_fill_manual(values = leg_dat$col) + theme_bw() +
+       theme(axis.text.x = element_blank(),
+             axis.text.y = element_text(size = 12),
+             axis.title.x = element_blank(),
+             axis.title.y = element_blank(),
+             axis.ticks.x = element_blank(),
+             panel.border = element_blank(),
+             panel.grid.minor = element_blank(),
+             panel.grid.major = element_blank())
+       
+   }
+   if(input$var == 'cpp'){
+     paint.brush = colorRampPalette(cbbPalette[c(5, 7)])
+     cols <- paint.brush(length(seq(0, map_max)))
+     leg_dat <- data_frame(y = seq(0, map_max), x = 1, col = cols)
+     
+     p <- ggplot(data = leg_dat) +
+       geom_tile(aes(y = y, fill = reorder(col, y), x = x), show_guide = FALSE) +
+       scale_y_continuous(limits = c(0, map_max), breaks = seq(0, map_max, length.out = 5)) +
+       scale_fill_manual(values = leg_dat$col) + theme_bw() +
+       theme(axis.text.x = element_blank(),
+             axis.text.y = element_text(size = 12),
+             axis.title.x = element_blank(),
+             axis.title.y = element_blank(),
+             axis.ticks.x = element_blank(),
+             panel.border = element_blank(),
+             panel.grid.minor = element_blank(),
+             panel.grid.major = element_blank())
+   }
+   
+   return(p)
+     
  })
  
 })

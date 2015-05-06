@@ -2,6 +2,7 @@ library(dplyr)
 library(googleCharts)
 library(dengueThailand)
 library(spatialpred)
+library(ggplot2)
 
 ## load most recent counts
 counts_file <- list.files(pattern = "counts")
