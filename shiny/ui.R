@@ -44,11 +44,12 @@ shinyUI(fluidPage(
   ## this starts the googleCharts engine
   googleChartsInit(),
   ## create title
-  titlePanel("Dengue prediction in Thailand"),
+  h2(uiOutput("text1")),
   ## create sidebar
   sidebarLayout(
     sidebarPanel(
       strong(helpText("These forecasts should be considered preliminary drafts, pending model validation.")),
+      
       tags$hr(),
       ## in map, allow for timespan selection
       conditionalPanel(
@@ -76,7 +77,7 @@ shinyUI(fluidPage(
         selectInput("start", "Select start year", choices = seq(2014, 2000, -1), selected = 2013)
       ),
       
-      # selectInput("language", "Language", choices = c(list("English" = "eng", "Thai" = "th")))
+      selectInput("language", "", choices = c(list("English" = "english", "Thai" = "thai"))),
       
       tags$hr(),
       
