@@ -47,8 +47,8 @@ new_counts <-  import_case_counts(
  link = link
 )
 
-new_counts$biweek <- date_to_biweek(new_counts$date_sick)
-new_counts$year <- year(new_counts$date_sick)
+new_counts$date_sick_biweek <- date_to_biweek(new_counts$date_sick)
+new_counts$date_sick_year <- year(new_counts$date_sick)
 
 old_counts <- import_old_case_counts(link=link)
 old_counts$delivery_date <- NA
