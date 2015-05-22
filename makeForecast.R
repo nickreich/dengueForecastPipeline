@@ -30,7 +30,7 @@ MODEL <- 'spamd_tops3_lag1'
 
 ## define machine-specific properties/folders
 ## Nick
-CORES <- 4
+CORES <- 18
 root_dir <- '~/Documents/code_versioned/denguePrediction/' ## parent dir for dengueForecastPipeline repo
 spamd_dir <- '~/Documents/code_versioned/spamd/'
 pgsql <- '~/credentials/sql_zaraza.rds'
@@ -110,8 +110,8 @@ counts <- read.csv(paste0("counts/", counts.list[recent.count]))
 ## subset to onset dates < TO_DATE
 to_time <- to_year + (to_biweek-1)/26
 counts_subset <- counts %>%
- filter( (year+(biweek-1)/26) < to_time) %>%
- group_by(disease, year, biweek, province) %>%
+ filter( (date_sick_year+(date_sick_biweek-1)/26) < to_time) %>%
+ group_by(disease, date_sick_year, date_sick_biweek, province) %>%
  summarize(count=sum(count))
 
 ## put into wide format, save all objects needed for prediction to aggregated_data
