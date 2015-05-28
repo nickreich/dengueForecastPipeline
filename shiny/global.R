@@ -10,14 +10,16 @@ counts_info <- file.info(counts_file)
 recent_counts <- which.max(counts_info$ctime)
 counts <- read.csv(counts_file[recent_counts])
 
-counts$date <- biweek_to_date(counts$biweek, counts$year)
+counts$date <- biweek_to_date(counts$date_sick_biweek,
+                              counts$date_sick_year)
 
 ## load most recent forecasts
 forecasts_file <- list.files(pattern = "forecast")
 forecasts_info <- file.info(forecasts_file)
 recent_forecasts <- which.max(forecasts_info$ctime)
 forecasts <- read.csv(forecasts_file[recent_forecasts])
-forecasts$date <- biweek_to_date(forecasts$biweek, forecasts$year)
+forecasts$date <- biweek_to_date(forecasts$date_sick_biweek,
+                                 forecasts$date_sick_year)
 forecasts$outbreak_prob <- round(forecasts$outbreak_prob)
 
 ## load thai population data

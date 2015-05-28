@@ -49,25 +49,26 @@ shinyServer(function(input, output, session) {
     ## format counts into plot format 
     plot_counts <- merge(counts, thai_prov_data, by.x="pid", by.y="FIPS",
                          all.x=T) %>%
-      filter(year >= input$start,
+      filter(date_sick_year >= input$start,
              MOPH_Admin_Code %in% moph) %>%
-      group_by(biweek, year) %>%
+      group_by(date_sick_biweek, date_sick_year) %>%
       summarise(count = round(sum(count)))
     
     ## add date variable
-    plot_counts$date <- biweek_to_date(plot_counts$biweek, 
-                                       plot_counts$year)
+    plot_counts$date <- biweek_to_date(plot_counts$date_sick_biweek, 
+                                       plot_counts$date_sick_year)
     
     plot_forecasts <- merge(forecasts, thai_prov_data, by.x="pid",
                             by.y="FIPS", all.x=T) %>%
       filter(MOPH_Admin_Code %in% moph) %>%
-      group_by(biweek, year) %>%
+      group_by(date_sick_biweek, date_sick_year) %>%
       summarise(predicted_count = round(sum(predicted_count)),
                 ub = round(sum(ub)),
                 lb = round(sum(lb)))
     plot_forecasts$unseen <- plot_forecasts$lb
     
-    plot_forecasts$date <- biweek_to_date(plot_forecasts$biweek, plot_forecasts$year)
+    plot_forecasts$date <- biweek_to_date(plot_forecasts$date_sick_biweek,
+                                          plot_forecasts$date_sick_year)
     
     plot_df <- merge(plot_counts, plot_forecasts, by = "date", all=T)[,c("date", "count", "predicted_count", "ub", "lb", "unseen")]
     
@@ -198,9 +199,9 @@ shinyServer(function(input, output, session) {
   
   output$text1 <- renderUI({
     if(input$language == "english")
-      return(Thai_translations[1,1])
+      return(Thai_translations[,1])
     if(input$language == "thai")
-      return(Thai_translations[1,2])
+      return(Thai_translations[,2])
   })
   
 })

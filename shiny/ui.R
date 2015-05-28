@@ -44,7 +44,7 @@ shinyUI(fluidPage(
   ## this starts the googleCharts engine
   googleChartsInit(),
   ## create title
-  h2(uiOutput("text1")),
+  # h2(uiOutput("text1")),
   ## create sidebar
   sidebarLayout(
     sidebarPanel(
