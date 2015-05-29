@@ -38,9 +38,10 @@ map_min <- min(mapMaxdf$cpp, na.rm=T)
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
                 "#0072B2", "#D55E00", "#CC79A7", "#cccccc")
 
-Thai_translations <- read.csv("~/Documents/dengueForecastPipeline/shiny/shiny-Thai-translations.csv", header = TRUE, stringsAsFactors = F)
+translation_df <- read.csv("~/Documents/dengueForecastPipeline/shiny/shiny-Thai-translations.csv",
+                           header = TRUE, stringsAsFactors = F)
 
-Thai_translations$Thai <- c("การพยากรณ์โรคไข้เลือดออก ประเทศไทย",
+translation_df$Thai <- c("การพยากรณ์โรคไข้เลือดออก ประเทศไทย",
                             "การพยากรณ์โรคไข้เลือดออกฉบับนี้เป็นฉบับร่าง ยังอยู่ระหว่างการตรวจสอบความถูกต้องแบบจำลองทางคณิตศาสตร์",
                             "เลือกวันที่",
                             "สองสัปดาห์ก่อนหน้า",
@@ -67,4 +68,4 @@ Thai_translations$Thai <- c("การพยากรณ์โรคไข้เ
                             "ความน่าจะเป็นในการเกิดการระบาดของโรคไข้เลือดออก",
                             "ผู้ป่วยไข้เลือดออกที่พบและผู้ป่วยจากการพยกรณ์ในประเทศไทย",
                             "ผู้ป่วยไข้เลือดออกที่พบและผู้ป่วยจากการพยกรณ์ในกรุงเทพมหานคร",
-                            "ผู้ป่วยไข้เลือดออกที่พบและผู้ป่วยจากการพยกรณ์ในเขตบริการสุขภาพที่ 4")
+                            "ผู้ป่วยไข้เลือดออกที่พบและผู้ป่วยจากการพยกรณ์ในเขตบริการสุขภาพที่")

@@ -44,45 +44,47 @@ shinyUI(fluidPage(
   ## this starts the googleCharts engine
   googleChartsInit(),
   ## create title
-  # h2(uiOutput("text1")),
+  h2(textOutput("txt1")),
   ## create sidebar
   sidebarLayout(
     sidebarPanel(
-      strong(helpText("These forecasts should be considered preliminary drafts, pending model validation.")),
+      strong(helpText(textOutput("txt2"))),
       
       tags$hr(),
       ## in map, allow for timespan selection
       conditionalPanel(
-        condition="input.tabs == 'Map'",
-        selectInput("date", "Select date", choices = names(table(forecasts$date))),
-        actionButton("back", "Previous"), actionButton("forward", "Next"),
+        condition="input.tabs == 'Geomap'",
+        selectInput("date", textOutput("txt3"), choices = names(table(forecasts$date))),
+        actionButton("back", textOutput("txt4")), actionButton("forward", textOutput("txt5")),
         tags$hr()
       ),
       
       conditionalPanel(
-        condition="input.tabs == 'Map'",
-        selectInput("var", "Select variable", 
-                    choices = list("Outbreak probability (%)" = "outbreak_prob",
-                                   "Predicted incidence rate" = "cpp"))),
+        condition="input.tabs == 'Geomap'",
+        selectInput("var", textOutput("txt6"), 
+                    choices = c("outbreak_prob", "cpp")
+                    )),
       
       conditionalPanel(
         condition="input.tabs == 'Plot'",
-        selectInput("moph", "Select MOPH region", multiple = FALSE,
+        selectInput("moph", textOutput("txt9"), multiple = FALSE,
                     choices = c(list("Thailand" = "all",
                                      "Bangkok" = 0), seq(1,12))
         )),
       
       conditionalPanel(
         condition="input.tabs == 'Plot'",
-        selectInput("start", "Select start year", choices = seq(2014, 2000, -1), selected = 2013)
+        selectInput("start", textOutput("txt12"), choices = seq(2014, 2000, -1), selected = 2013)
       ),
       
-      selectInput("language", "", choices = c(list("English" = "english", "Thai" = "thai"))),
+      
+      radioButtons("language", "", choices = c("ไทย" = "Thai", "English" = "English")),
+      # img(src = "English.svg", height=105, width=105),
       
       tags$hr(),
       
       ## author line
-      h6("Created by:"),
+      h6(textOutput("txt15")),
       h6("Stephen A Lauer"),
       h6("Krzysztof Sakrejda"),
       h6("Nicholas G Reich")
@@ -94,7 +96,7 @@ shinyUI(fluidPage(
       ## create tabs
       tabsetPanel(
         ## plot map
-        tabPanel("Map", ## make chart title here (otherwise not centered)
+        tabPanel(textOutput("txt13"), ## make chart title here (otherwise not centered)
                  h4(uiOutput("map_title"), align="center"),
                  
                  ## make geochart
@@ -138,13 +140,13 @@ shinyUI(fluidPage(
                  conditionalPanel(
                    condition="input.action == 0",
                    absolutePanel(right = 400, top = 300, width = 200, class = "floater",
-                                 actionButton("action", "These are draft predictions. Click to continue."))),
+                                 actionButton("action", textOutput("txt16")))),
                  
                  absolutePanel(right = 0, top = 100, width = 100, class = "floater",
                                plotOutput("legend")),
-        id="Map"),
+                 value="Geomap"),
         ## plot tab with google chart options
-        tabPanel("Time Series",
+        tabPanel(textOutput("txt14"),
                  ## make chart title here (otherwise not centered)
                  h4(uiOutput("plot_title"), align="center"),
                  ## make line chart
@@ -168,7 +170,6 @@ shinyUI(fluidPage(
                        italic = FALSE)
                    ),
                    vAxis = list(
-                     title = "Number of cases per biweek",
                      textStyle = list(
                        fontSize = 14),
                      titleTextStyle = list(
