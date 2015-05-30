@@ -38,7 +38,7 @@ map_min <- min(mapMaxdf$cpp, na.rm=T)
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
                 "#0072B2", "#D55E00", "#CC79A7", "#cccccc")
 
-translation_df <- read.csv("~/Documents/dengueForecastPipeline/shiny/shiny-Thai-translations.csv",
+translation_df <- read.csv("shiny-Thai-translations.csv",
                            header = TRUE, stringsAsFactors = F)
 
 translation_df$Thai <- c("การพยากรณ์โรคไข้เลือดออก ประเทศไทย",
