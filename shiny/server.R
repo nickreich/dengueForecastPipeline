@@ -74,8 +74,7 @@ shinyServer(function(input, output, session) {
   plot_counts$date <- biweek_to_date(plot_counts$date_sick_biweek, 
                                      plot_counts$date_sick_year)
   
-  plot_forecasts <- merge(forecasts, thai_prov_data, by.x="pid",
-                          by.y="FIPS", all.x=T) %>%
+  plot_forecasts <- merge(forecasts, thai_prov_data, by.x="pid", by.y="FIPS", all.x=T) %>%
    filter(MOPH_Admin_Code %in% moph) %>%
    group_by(date_sick_biweek, date_sick_year) %>%
    summarise(predicted_count = round(sum(predicted_count)),
